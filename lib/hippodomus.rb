@@ -6,6 +6,7 @@ require 'fog'
 
 Dotenv.load
 
+# Load postcode areas from Wikipedia
 doc = Nokogiri::HTML(open(ENV['WIKIPEDIA_URL']))
 
 table = doc.css("table.wikitable:first-of-type")
@@ -16,6 +17,7 @@ table.css("tr").each do |row|
   areas << row.css("td").first.inner_text rescue nil
 end
 
+# Export addresses by postcode area
 areas.each do |area|
   command = "mongoexport --host #{ENV['MONGO_HOST']} --db #{ENV['MONGO_DB']} --collection addresses --csv --fields pao,sao,street,locality,town,postcode --out addresses/#{area}.csv --sort \"{postcode: 1}\" --query \"{ postcode: /^#{area}.*/i }\""
   command << " --username #{ENV['MONGO_USERNAME']} " if ENV['MONGO_USERNAME']
@@ -23,6 +25,7 @@ areas.each do |area|
   `#{command}`
 end
 
+# Zip CSVs by letter
 ("A".."Z").each do |letter|
   files = Dir.glob("./addresses/#{letter}*")
   if files.count > 0
@@ -34,12 +37,14 @@ end
   end
 end
 
+# Zip all the zips
 Zip::File.open("./addresses/addresses.zip", Zip::File::CREATE) do |zipfile|
   Dir.glob("./addresses/*.zip").each do |file|
     zipfile.add(File.basename(file), file)
   end
 end
 
+# Connect to AWS
 connection = Fog::Storage.new({
   :provider                 => 'AWS',
   :aws_access_key_id        => ENV['AWS_ACCESS_KEY'],
@@ -56,10 +61,12 @@ directory.files.create(
   :public => true
 )
 
+# Update main file
 file.body = File.open("./addresses/addresses.zip")
 file.public = true
 file.save
 
+# Update torrent file
 torrent = directory.files.get("addresses.torrent")
 torrent.body = open("#{file.public_url}?torrent").read
 torrent.save
