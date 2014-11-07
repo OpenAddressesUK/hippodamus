@@ -69,4 +69,5 @@ file.save
 # Update torrent file
 torrent = directory.files.get("addresses.torrent")
 torrent.body = open("#{file.public_url}?torrent").read
+torrent.public = true
 torrent.save
