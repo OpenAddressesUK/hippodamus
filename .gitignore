@@ -1,3 +1,5 @@
 .env
 addresses
 *.torrent
+coverage
+dump

@@ -18,7 +18,6 @@ class Hippodomus
 
       zip_by_letter(format)
       zip_all(format)
-      upload(format)
       file = upload(format)
       get_torrent(file, format)
       `rm -r addresses/`
@@ -52,7 +51,7 @@ class Hippodomus
     command = "mongoexport --host #{ENV['MONGO_HOST']} --db #{ENV['MONGO_DB']} --collection addresses --#{option} --fields pao,sao,street,locality,town,postcode --out addresses/#{area}.#{format} --sort \"{postcode: 1}\" --query \"{ postcode: /^#{area}.*/i }\""
     command << " --username #{ENV['MONGO_USERNAME']} " if ENV['MONGO_USERNAME']
     command << " --password #{ENV['MONGO_PASSWORD']} " if ENV['MONGO_PASSWORD']
-    `#{command}`
+    `#{command} > /dev/null 2>&1`
   end
 
   def self.zip_by_letter(format)
