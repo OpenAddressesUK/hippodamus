@@ -66,10 +66,10 @@ file.body = File.open("./addresses/addresses.zip")
 file.public = true
 file.save
 
-# Update torrent file
-torrent = directory.files.get("addresses.torrent")
-torrent.body = open("#{file.public_url}?torrent").read
-torrent.public = true
-torrent.save
+# Download torrent file
+open('addresses.torrent', 'wb') do |f|
+  f << open("#{file.public_url}?torrent").read
+end
+
 # Cleanup
 `rm -r addresses/`
