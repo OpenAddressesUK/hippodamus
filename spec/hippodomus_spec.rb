@@ -18,9 +18,9 @@ describe Hippodomus do
 
     it "exports addresses for a given area" do
       Hippodomus.mongo_export("AB", @option, @format)
-      csv = CSV.parse(File.open("addresses/AB.csv").read)
+      csv = CSV.parse(File.open(get_file("AB.csv")).read)
 
-      expect(File.exist?("addresses/AB.csv")).to eq(true)
+      expect(File.exist?(get_file("AB.csv"))).to eq(true)
       expect(csv.count).to eq(55)
     end
 
@@ -29,7 +29,7 @@ describe Hippodomus do
       Hippodomus.mongo_export("WV", @option, @format)
       Hippodomus.zip_by_letter(@format)
 
-      expect(File.exist?("addresses/W.csv.zip")).to eq(true)
+      expect(File.exist?(get_file("W.csv.zip"))).to eq(true)
     end
 
     it "zips all the zips by format" do
@@ -41,7 +41,7 @@ describe Hippodomus do
       Hippodomus.zip_by_letter(@format)
       Hippodomus.zip_all(@format)
 
-      expect(File.exist?("addresses/addresses.csv.zip")).to eq(true)
+      expect(File.exist?(get_file("addresses.csv.zip"))).to eq(true)
     end
 
   end
@@ -55,9 +55,9 @@ describe Hippodomus do
 
     it "exports addresses for a given area" do
       Hippodomus.mongo_export("AB", @option, @format)
-      json = JSON.parse(File.open("addresses/AB.json").read)
+      json = JSON.parse(File.open(get_file("AB.json")).read)
 
-      expect(File.exist?("addresses/AB.json")).to eq(true)
+      expect(File.exist?(get_file("AB.json"))).to eq(true)
       expect(json.count).to eq(54)
     end
 
@@ -66,7 +66,7 @@ describe Hippodomus do
       Hippodomus.mongo_export("WV", @option, @format)
       Hippodomus.zip_by_letter(@format)
 
-      expect(File.exist?("addresses/W.json.zip")).to eq(true)
+      expect(File.exist?(get_file("W.json.zip"))).to eq(true)
     end
 
     it "zips all the zips by format" do
@@ -78,7 +78,7 @@ describe Hippodomus do
       Hippodomus.zip_by_letter(@format)
       Hippodomus.zip_all(@format)
 
-      expect(File.exist?("addresses/addresses.json.zip")).to eq(true)
+      expect(File.exist?(get_file("addresses.json.zip"))).to eq(true)
     end
 
   end

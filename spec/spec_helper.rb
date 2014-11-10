@@ -32,3 +32,7 @@ RSpec.configure do |config|
   end
 
 end
+
+def get_file(filename)
+  File.join( File.dirname(__FILE__), "..", "addresses", filename )
+end
