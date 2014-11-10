@@ -27,12 +27,12 @@ RSpec.configure do |config|
   end
 
   config.after(:each) do
-    `rm -r addresses/ > /dev/null 2>&1`
+    `rm -r /tmp/addresses/ > /dev/null 2>&1`
     Fog::Mock.reset
   end
 
 end
 
 def get_file(filename)
-  File.join( File.dirname(__FILE__), "..", "addresses", filename )
+  File.join( "/", "tmp", "addresses", filename )
 end

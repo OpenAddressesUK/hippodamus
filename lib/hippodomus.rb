@@ -20,7 +20,7 @@ class Hippodomus
       zip_all(format)
       file = upload(format)
       get_torrent(file, format)
-      `rm -r addresses/`
+      `rm -r /tmp/addresses/`
     end
   end
 
@@ -48,7 +48,7 @@ class Hippodomus
   end
 
   def self.mongo_export(area, option, format)
-    command = "mongoexport --host #{ENV['MONGO_HOST']} --db #{ENV['MONGO_DB']} --collection addresses --#{option} --fields pao,sao,street,locality,town,postcode --out addresses/#{area}.#{format} --sort \"{postcode: 1}\" --query \"{ postcode: /^#{area}.*/i }\""
+    command = "mongoexport --host #{ENV['MONGO_HOST']} --db #{ENV['MONGO_DB']} --collection addresses --#{option} --fields pao,sao,street,locality,town,postcode --out /tmp/addresses/#{area}.#{format} --sort \"{postcode: 1}\" --query \"{ postcode: /^#{area}.*/i }\""
     command << " --username #{ENV['MONGO_USERNAME']} " if ENV['MONGO_USERNAME']
     command << " --password #{ENV['MONGO_PASSWORD']} " if ENV['MONGO_PASSWORD']
     `#{command} > /dev/null 2>&1`
@@ -56,9 +56,9 @@ class Hippodomus
 
   def self.zip_by_letter(format)
     ("A".."Z").each do |letter|
-      files = Dir.glob("./addresses/#{letter}*#{format}")
+      files = Dir.glob("/tmp/addresses/#{letter}*#{format}")
       if files.count > 0
-        Zip::File.open("./addresses/#{letter}.#{format}.zip", Zip::File::CREATE) do |zipfile|
+        Zip::File.open("/tmp/addresses/#{letter}.#{format}.zip", Zip::File::CREATE) do |zipfile|
           files.each do |file|
             zipfile.add(File.basename(file), file)
           end
@@ -68,8 +68,8 @@ class Hippodomus
   end
 
   def self.zip_all(format)
-    Zip::File.open("./addresses/addresses.#{format}.zip", Zip::File::CREATE) do |zipfile|
-      Dir.glob("./addresses/*#{format}.zip").each do |file|
+    Zip::File.open("/tmp/addresses/addresses.#{format}.zip", Zip::File::CREATE) do |zipfile|
+      Dir.glob("/tmp/addresses/*#{format}.zip").each do |file|
         zipfile.add(File.basename(file), file)
       end
     end
@@ -87,7 +87,7 @@ class Hippodomus
     )
 
     # Update main file
-    file.body = File.open("./addresses/addresses.#{format}.zip")
+    file.body = File.open("/tmp/addresses/addresses.#{format}.zip")
     file.public = true
     file.save
     file
