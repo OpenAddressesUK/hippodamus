@@ -6,78 +6,97 @@ require 'fog'
 
 Dotenv.load
 
-# Load postcode areas from Wikipedia
-doc = Nokogiri::HTML(open(ENV['WIKIPEDIA_URL']))
+class Hippodomus
+  def self.perform
+    {
+      csv: "csv",
+      json: "jsonArray"
+    }.each do |format, option|
+      postcode_areas.each do |area|
+        mongo_export(area, option, format)
+      end
 
-table = doc.css("table.wikitable:first-of-type")
+      zip_by_letter(format)
+      zip_all(format)
+      upload(format)
+      file = upload(format)
+      get_torrent(file, format)
+      `rm -r addresses/`
+    end
+  end
 
-areas = []
+  def self.postcode_areas
+    # Load postcode areas from Wikipedia
+    doc = Nokogiri::HTML(open(ENV['WIKIPEDIA_URL']))
 
-table.css("tr").each do |row|
-  areas << row.css("td").first.inner_text rescue nil
-end
+    table = doc.css("table.wikitable:first-of-type")
 
-# Connect to AWS
-connection = Fog::Storage.new({
-  :provider                 => 'AWS',
-  :aws_access_key_id        => ENV['AWS_ACCESS_KEY'],
-  :aws_secret_access_key    => ENV['AWS_SECRET_ACCESS_KEY']
-})
+    areas = []
 
-# Export addresses by postcode area
+    table.css("tr").each do |row|
+      areas << row.css("td").first.inner_text rescue nil
+    end
 
-{
-  csv: "csv",
-  json: "jsonArray"
-}.each do |format, option|
+    areas
+  end
 
-  areas.each do |area|
+  def self.connection
+    @@connection = Fog::Storage.new({
+      :provider                 => 'AWS',
+      :aws_access_key_id        => ENV['AWS_ACCESS_KEY'],
+      :aws_secret_access_key    => ENV['AWS_SECRET_ACCESS_KEY']
+    })
+  end
+
+  def self.mongo_export(area, option, format)
     command = "mongoexport --host #{ENV['MONGO_HOST']} --db #{ENV['MONGO_DB']} --collection addresses --#{option} --fields pao,sao,street,locality,town,postcode --out addresses/#{area}.#{format} --sort \"{postcode: 1}\" --query \"{ postcode: /^#{area}.*/i }\""
     command << " --username #{ENV['MONGO_USERNAME']} " if ENV['MONGO_USERNAME']
     command << " --password #{ENV['MONGO_PASSWORD']} " if ENV['MONGO_PASSWORD']
     `#{command}`
   end
 
-  # Zip CSVs by letter
-  ("A".."Z").each do |letter|
-    files = Dir.glob("./addresses/#{letter}*#{format}")
-    if files.count > 0
-      Zip::File.open("./addresses/#{letter}.#{format}.zip", Zip::File::CREATE) do |zipfile|
-        files.each do |file|
-          zipfile.add(File.basename(file), file)
+  def self.zip_by_letter(format)
+    ("A".."Z").each do |letter|
+      files = Dir.glob("./addresses/#{letter}*#{format}")
+      if files.count > 0
+        Zip::File.open("./addresses/#{letter}.#{format}.zip", Zip::File::CREATE) do |zipfile|
+          files.each do |file|
+            zipfile.add(File.basename(file), file)
+          end
         end
       end
     end
   end
 
-  # Zip all the zips
-  Zip::File.open("./addresses/addresses.#{format}.zip", Zip::File::CREATE) do |zipfile|
-    Dir.glob("./addresses/*#{format}.zip").each do |file|
-      zipfile.add(File.basename(file), file)
+  def self.zip_all(format)
+    Zip::File.open("./addresses/addresses.#{format}.zip", Zip::File::CREATE) do |zipfile|
+      Dir.glob("./addresses/*#{format}.zip").each do |file|
+        zipfile.add(File.basename(file), file)
+      end
     end
   end
 
-  directory = connection.directories.get("open-addresses")
-  file = directory.files.get("addresses.#{format}.zip")
+  def self.upload(format)
+    directory = connection.directories.get("open-addresses")
+    file = directory.files.get("addresses.#{format}.zip")
 
-  # Backup old file
-  directory.files.create(
-    :key    => "addresses-#{DateTime.now.to_s}.#{format}.zip",
-    :body   => file.body,
-    :public => true
-  )
+    # Backup old file
+    directory.files.create(
+      :key    => "addresses-#{DateTime.now.to_s}.#{format}.zip",
+      :body   => file.body,
+      :public => true
+    )
 
-  # Update main file
-  file.body = File.open("./addresses/addresses.#{format}.zip")
-  file.public = true
-  file.save
-
-  # Download torrent file
-  open("addresses.#{format}.torrent", 'wb') do |f|
-    f << open("#{file.public_url}?torrent").read
+    # Update main file
+    file.body = File.open("./addresses/addresses.#{format}.zip")
+    file.public = true
+    file.save
+    file
   end
 
+  def self.get_torrent(file, format)
+    open("addresses.#{format}.torrent", 'wb') do |f|
+      f << open("#{file.public_url}?torrent").read
+    end
+  end
 end
-
-# Cleanup
-`rm -r addresses/`
