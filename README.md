@@ -16,7 +16,7 @@ Add a file named `.env` with the following:
 
 ```
 WIKIPEDIA_URL: https://en.wikipedia.org/wiki/List_of_postcode_areas_in_the_United_Kingdom
-MONGO_DB: {The database name of yoyr theodolite database}
+MONGO_DB: {The database name of your theodolite database}
 MONGO_HOST: {Your theodolite database host}
 MONGO_USERNAME: {Your theodolite database password (if applicable)}
 MONGO_PASSWORD: {Your theodolite database password (if applicable)}
