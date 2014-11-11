@@ -79,12 +79,18 @@ class Hippodamus
     directory = connection.directories.get("open-addresses")
     file = directory.files.get("addresses.#{format}.zip")
 
-    # Backup old file
-    directory.files.create(
-      :key    => "addresses-#{DateTime.now.to_s}.#{format}.zip",
-      :body   => file.body,
-      :public => true
-    )
+    if file.nil?
+      file = directory.files.create(
+        :key    => "addresses.#{format}.zip"
+      )
+    else
+      # Backup old file
+      directory.files.create(
+        :key    => "addresses-#{DateTime.now.to_s}.#{format}.zip",
+        :body   => file.body,
+        :public => true
+      )
+    end
 
     # Update main file
     file.body = File.open("/tmp/addresses/addresses.#{format}.zip")

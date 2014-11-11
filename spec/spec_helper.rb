@@ -45,18 +45,6 @@ RSpec.configure do |config|
       public: true
     )
 
-    @directory.files.create(
-      key: 'addresses.csv.zip',
-      body: "",
-      public: true
-    )
-
-    @directory.files.create(
-      key: 'addresses.json.zip',
-      body: "",
-      public: true
-    )
-
     Hippodamus.mongo_export("WS", "csv", "csv")
 
     Hippodamus.zip_by_letter("csv")
