@@ -1,0 +1,47 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://open-addresses.s3.amazonaws.com/addresses.csv.zip?torrent
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      X-Amz-Id-2:
+      - 5VtyXYbRY0mjIkviXxdrMMJ09GGmcvJsc90/sufCqUbUusBYk4E1UlM1NyZYo/B39bdatAZtF1E=
+      X-Amz-Request-Id:
+      - D7FDF165D7C2E03D
+      Date:
+      - Tue, 11 Nov 2014 10:32:52 GMT
+      Content-Disposition:
+      - attachment; filename=addresses.csv.zip.torrent;
+      Content-Type:
+      - application/x-bittorrent
+      Content-Length:
+      - '313'
+      Server:
+      - AmazonS3
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        ZDg6YW5ub3VuY2U1NTpodHRwOi8vczMtdHJhY2tlci5ldS13ZXN0LTEuYW1h
+        em9uYXdzLmNvbTo2OTY5L2Fubm91bmNlMTM6YW5ub3VuY2UtbGlzdGxsNTU6
+        aHR0cDovL3MzLXRyYWNrZXIuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb206Njk2
+        OS9hbm5vdW5jZWVlNDppbmZvZDY6bGVuZ3RoaTU0NzFlNDpuYW1lMTc6YWRk
+        cmVzc2VzLmNzdi56aXAxMjpwaWVjZSBsZW5ndGhpMjYyMTQ0ZTY6cGllY2Vz
+        MjA6DFG98CTO82HCXBJohuAhD5SAb9wxMjp4LWFtei1idWNrZXQxNDpvcGVu
+        LWFkZHJlc3Nlczk6eC1hbXota2V5MTc6YWRkcmVzc2VzLmNzdi56aXBlZQ==
+    http_version: 
+  recorded_at: Tue, 11 Nov 2014 10:32:52 GMT
+recorded_with: VCR 2.9.3

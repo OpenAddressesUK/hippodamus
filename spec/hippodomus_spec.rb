@@ -110,4 +110,11 @@ describe Hippodomus do
     Timecop.return
   end
 
+  it "downloads the torrent", :fog, :vcr do
+    file = Hippodomus.upload("csv")
+    Hippodomus.get_torrent(file, "csv")
+
+    expect(File.exist?("addresses.csv.torrent")).to eq(true)
+  end
+
 end
