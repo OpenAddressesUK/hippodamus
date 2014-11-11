@@ -1,4 +1,4 @@
-require 'hippodomus'
+require 'hippodamus'
 require 'vcr'
 require 'pry'
 require 'csv'
@@ -33,13 +33,13 @@ RSpec.configure do |config|
 
   config.before(:example, :fog) do
     Fog.mock!
-    allow(Hippodomus).to receive(:connection).and_return(Fog::Storage.new({
+    allow(Hippodamus).to receive(:connection).and_return(Fog::Storage.new({
       :aws_access_key_id      => 'fake_access_key_id',
       :aws_secret_access_key  => 'fake_secret_access_key',
       :provider               => 'AWS'
     }))
 
-    @connection = Hippodomus.connection
+    @connection = Hippodamus.connection
     @directory = @connection.directories.create(
       key: "open-addresses",
       public: true
@@ -57,10 +57,10 @@ RSpec.configure do |config|
       public: true
     )
 
-    Hippodomus.mongo_export("WS", "csv", "csv")
+    Hippodamus.mongo_export("WS", "csv", "csv")
 
-    Hippodomus.zip_by_letter("csv")
-    Hippodomus.zip_all("csv")
+    Hippodamus.zip_by_letter("csv")
+    Hippodamus.zip_all("csv")
   end
 
   config.after(:example, :fog) do

@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-describe Hippodomus do
+describe Hippodamus do
 
   it "gets a list of postcode areas", :vcr do
-    postcode_areas = Hippodomus.postcode_areas
+    postcode_areas = Hippodamus.postcode_areas
     expect(postcode_areas.count).to eq(121)
     expect(postcode_areas.first).to eq("AB")
     expect(postcode_areas.last).to eq("ZE")
@@ -17,7 +17,7 @@ describe Hippodomus do
     end
 
     it "exports addresses for a given area" do
-      Hippodomus.mongo_export("AB", @option, @format)
+      Hippodamus.mongo_export("AB", @option, @format)
       csv = CSV.parse(File.open(get_file("AB.csv")).read)
 
       expect(File.exist?(get_file("AB.csv"))).to eq(true)
@@ -25,21 +25,21 @@ describe Hippodomus do
     end
 
     it "zips all exant files by letter" do
-      Hippodomus.mongo_export("WS", @option, @format)
-      Hippodomus.mongo_export("WV", @option, @format)
-      Hippodomus.zip_by_letter(@format)
+      Hippodamus.mongo_export("WS", @option, @format)
+      Hippodamus.mongo_export("WV", @option, @format)
+      Hippodamus.zip_by_letter(@format)
 
       expect(File.exist?(get_file("W.csv.zip"))).to eq(true)
     end
 
     it "zips all the zips by format" do
-      Hippodomus.mongo_export("WS", @option, @format)
-      Hippodomus.mongo_export("WV", @option, @format)
-      Hippodomus.mongo_export("TF", @option, @format)
-      Hippodomus.mongo_export("ST", @option, @format)
+      Hippodamus.mongo_export("WS", @option, @format)
+      Hippodamus.mongo_export("WV", @option, @format)
+      Hippodamus.mongo_export("TF", @option, @format)
+      Hippodamus.mongo_export("ST", @option, @format)
 
-      Hippodomus.zip_by_letter(@format)
-      Hippodomus.zip_all(@format)
+      Hippodamus.zip_by_letter(@format)
+      Hippodamus.zip_all(@format)
 
       expect(File.exist?(get_file("addresses.csv.zip"))).to eq(true)
     end
@@ -54,7 +54,7 @@ describe Hippodomus do
     end
 
     it "exports addresses for a given area" do
-      Hippodomus.mongo_export("AB", @option, @format)
+      Hippodamus.mongo_export("AB", @option, @format)
       json = JSON.parse(File.open(get_file("AB.json")).read)
 
       expect(File.exist?(get_file("AB.json"))).to eq(true)
@@ -62,21 +62,21 @@ describe Hippodomus do
     end
 
     it "zips all exant files by letter" do
-      Hippodomus.mongo_export("WS", @option, @format)
-      Hippodomus.mongo_export("WV", @option, @format)
-      Hippodomus.zip_by_letter(@format)
+      Hippodamus.mongo_export("WS", @option, @format)
+      Hippodamus.mongo_export("WV", @option, @format)
+      Hippodamus.zip_by_letter(@format)
 
       expect(File.exist?(get_file("W.json.zip"))).to eq(true)
     end
 
     it "zips all the zips by format" do
-      Hippodomus.mongo_export("WS", @option, @format)
-      Hippodomus.mongo_export("WV", @option, @format)
-      Hippodomus.mongo_export("TF", @option, @format)
-      Hippodomus.mongo_export("ST", @option, @format)
+      Hippodamus.mongo_export("WS", @option, @format)
+      Hippodamus.mongo_export("WV", @option, @format)
+      Hippodamus.mongo_export("TF", @option, @format)
+      Hippodamus.mongo_export("ST", @option, @format)
 
-      Hippodomus.zip_by_letter(@format)
-      Hippodomus.zip_all(@format)
+      Hippodamus.zip_by_letter(@format)
+      Hippodamus.zip_all(@format)
 
       expect(File.exist?(get_file("addresses.json.zip"))).to eq(true)
     end
@@ -84,7 +84,7 @@ describe Hippodomus do
   end
 
   it "uploads to S3", :fog do
-    Hippodomus.upload("csv")
+    Hippodamus.upload("csv")
     file = @directory.files.get("addresses.csv.zip")
 
     expect(file.body).to eq(File.open("/tmp/addresses/addresses.csv.zip").read)
@@ -93,16 +93,16 @@ describe Hippodomus do
   it "backs up the old version", :fog do
     Timecop.freeze
 
-    Hippodomus.upload("csv")
+    Hippodamus.upload("csv")
     old_file = @directory.files.get("addresses.csv.zip")
 
     `rm -r /tmp/addresses/ > /dev/null 2>&1`
 
-    Hippodomus.mongo_export("AB", "csv", "csv")
-    Hippodomus.zip_by_letter("csv")
-    Hippodomus.zip_all("csv")
+    Hippodamus.mongo_export("AB", "csv", "csv")
+    Hippodamus.zip_by_letter("csv")
+    Hippodamus.zip_all("csv")
 
-    new_file = Hippodomus.upload("csv")
+    new_file = Hippodamus.upload("csv")
     backup = @directory.files.get("addresses-#{DateTime.now.to_s}.csv.zip")
 
     expect(backup.body).to eq(old_file.body)
@@ -111,8 +111,8 @@ describe Hippodomus do
   end
 
   it "downloads the torrent", :fog, :vcr do
-    file = Hippodomus.upload("csv")
-    Hippodomus.get_torrent(file, "csv")
+    file = Hippodamus.upload("csv")
+    Hippodamus.get_torrent(file, "csv")
 
     expect(File.exist?("addresses.csv.torrent")).to eq(true)
   end

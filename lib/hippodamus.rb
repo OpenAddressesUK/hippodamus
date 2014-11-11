@@ -6,7 +6,7 @@ require 'fog'
 
 Dotenv.load
 
-class Hippodomus
+class Hippodamus
   def self.perform
     {
       csv: "csv",
