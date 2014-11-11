@@ -83,4 +83,31 @@ describe Hippodomus do
 
   end
 
+  it "uploads to S3", :fog do
+    Hippodomus.upload("csv")
+    file = @directory.files.get("addresses.csv.zip")
+
+    expect(file.body).to eq(File.open("/tmp/addresses/addresses.csv.zip").read)
+  end
+
+  it "backs up the old version", :fog do
+    Timecop.freeze
+
+    Hippodomus.upload("csv")
+    old_file = @directory.files.get("addresses.csv.zip")
+
+    `rm -r /tmp/addresses/ > /dev/null 2>&1`
+
+    Hippodomus.mongo_export("AB", "csv", "csv")
+    Hippodomus.zip_by_letter("csv")
+    Hippodomus.zip_all("csv")
+
+    new_file = Hippodomus.upload("csv")
+    backup = @directory.files.get("addresses-#{DateTime.now.to_s}.csv.zip")
+
+    expect(backup.body).to eq(old_file.body)
+
+    Timecop.return
+  end
+
 end

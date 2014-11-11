@@ -2,6 +2,7 @@ require 'hippodomus'
 require 'vcr'
 require 'pry'
 require 'csv'
+require 'timecop'
 
 require 'simplecov'
 SimpleCov.start
@@ -28,7 +29,43 @@ RSpec.configure do |config|
 
   config.after(:each) do
     `rm -r /tmp/addresses/ > /dev/null 2>&1`
+  end
+
+  config.before(:example, :fog) do
+    Fog.mock!
+    allow(Hippodomus).to receive(:connection).and_return(Fog::Storage.new({
+      :aws_access_key_id      => 'fake_access_key_id',
+      :aws_secret_access_key  => 'fake_secret_access_key',
+      :provider               => 'AWS'
+    }))
+
+    @connection = Hippodomus.connection
+    @directory = @connection.directories.create(
+      key: "open-addresses",
+      public: true
+    )
+
+    @directory.files.create(
+      key: 'addresses.csv.zip',
+      body: "",
+      public: true
+    )
+
+    @directory.files.create(
+      key: 'addresses.json.zip',
+      body: "",
+      public: true
+    )
+
+    Hippodomus.mongo_export("WS", "csv", "csv")
+
+    Hippodomus.zip_by_letter("csv")
+    Hippodomus.zip_all("csv")
+  end
+
+  config.after(:example, :fog) do
     Fog::Mock.reset
+    Fog.unmock!
   end
 
 end
