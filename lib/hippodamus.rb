@@ -19,7 +19,7 @@ class Hippodamus
       zip_by_letter(format)
       zip_all(format)
       file = upload(format)
-      get_torrent(file, format)
+      upload_torrent(file, format)
       `rm -r /tmp/addresses/`
     end
   end
@@ -76,7 +76,6 @@ class Hippodamus
   end
 
   def self.upload(format)
-    directory = connection.directories.get("open-addresses")
     file = directory.files.get("addresses.#{format}.zip")
 
     if file.nil?
@@ -99,9 +98,17 @@ class Hippodamus
     file
   end
 
-  def self.get_torrent(file, format)
-    open("addresses.#{format}.torrent", 'wb') do |f|
-      f << open("#{file.public_url}?torrent").read
-    end
+  def self.upload_torrent(file, format)
+    torrent = directory.files.get("addresses.#{format}.torrent")
+    torrent_body = open("#{file.public_url}?torrent").read
+
+    file = directory.files.create(key: "addresses.#{format}.torrent") if torrent.nil?
+    file.body = torrent_body
+    file.public = true
+    file.save
+  end
+
+  def self.directory
+    @@directory = connection.directories.get("open-addresses")
   end
 end

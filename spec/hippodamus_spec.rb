@@ -110,11 +110,13 @@ describe Hippodamus do
     Timecop.return
   end
 
-  it "downloads the torrent", :fog, :vcr do
+  it "uploads the torrent file", :fog, :vcr do
     file = Hippodamus.upload("csv")
-    Hippodamus.get_torrent(file, "csv")
+    Hippodamus.upload_torrent(file, "csv")
 
-    expect(File.exist?("addresses.csv.torrent")).to eq(true)
+    torrent = @directory.files.get("addresses.csv.torrent")
+
+    expect(torrent.body).to match(/d8:announce55:/)
   end
 
 end
