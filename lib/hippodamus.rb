@@ -48,7 +48,7 @@ class Hippodamus
   end
 
   def self.mongo_export(area, option, format)
-    command = "mongoexport --host #{ENV['MONGO_HOST']} --db #{ENV['MONGO_DB']} --collection addresses --#{option} --fields pao,sao,street,locality,town,postcode --out /tmp/addresses/#{area}.#{format} --sort \"{postcode: 1}\" --query \"{ postcode: /^#{area}[0-9]{1,2}[A-Z]?.*/i }\""
+    command = "mongoexport --host #{ENV['MONGO_HOST']} --db #{ENV['MONGO_DB']} --collection addresses --#{option} --fields pao,sao,street.name,locality.name,town.name,postcode.name,provenance --out /tmp/addresses/#{area}.#{format} --sort \"{postcode: 1}\" --query \"{ postcode: /^#{area}[0-9]{1,2}[A-Z]?.*/i }\""
     command << " --username #{ENV['MONGO_USERNAME']} " if ENV['MONGO_USERNAME']
     command << " --password #{ENV['MONGO_PASSWORD']} " if ENV['MONGO_PASSWORD']
     `#{command} > /dev/null 2>&1`
