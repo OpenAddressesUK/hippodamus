@@ -1,16 +1,19 @@
-require 'hippodamus'
 require 'vcr'
 require 'pry'
 require 'csv'
 require 'timecop'
+require 'factory_girl'
+require 'database_cleaner'
+
+ENV['MONGOID_ENVIRONMENT'] = "test"
+
+require 'hippodamus'
 
 require 'simplecov'
 SimpleCov.start
 
 require 'coveralls'
 Coveralls.wear!
-
-ENV['MONGO_DB'] = "hippodamus_test"
 
 Fog.mock!
 
@@ -22,13 +25,22 @@ VCR.configure do |c|
 end
 
 RSpec.configure do |config|
+  config.include FactoryGirl::Syntax::Methods
+  FactoryGirl.definition_file_paths = ["#{Gem.loaded_specs['mongoid_address_models'].full_gem_path}/lib/mongoid_address_models/factories", "./spec/factories"]
+  FactoryGirl.find_definitions
 
-  config.before(:all) do
-    `mongoimport --db #{ENV['MONGO_DB']} --collection addresses --file spec/fixtures/adresses.json --drop`
+  config.before(:suite) do
+    DatabaseCleaner[:mongoid].strategy = :truncation
+    DatabaseCleaner[:mongoid].clean_with(:truncation)
+  end
+
+  config.before(:each) do
+    DatabaseCleaner.start
   end
 
   config.after(:each) do
     `rm -r /tmp/addresses/ > /dev/null 2>&1`
+    DatabaseCleaner.clean
   end
 
   config.before(:example, :fog) do
@@ -45,7 +57,7 @@ RSpec.configure do |config|
       public: true
     )
 
-    Hippodamus.mongo_export("WS", "csv", "csv")
+    Hippodamus.create_csv("WS")
 
     Hippodamus.zip_by_letter("csv")
     Hippodamus.zip_all("csv")
