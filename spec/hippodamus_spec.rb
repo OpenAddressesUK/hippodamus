@@ -23,11 +23,18 @@ describe Hippodamus do
 
       Hippodamus.create_csv("AB")
       csv = CSV.parse(File.open(get_file("AB.csv")).read)
-      address = Address.last
-      derivation = address.provenance['activity']['derived_from'].first
 
       expect(File.exist?(get_file("AB.csv"))).to eq(true)
       expect(csv.count).to eq((55 * 4) + 1) # We expect 4 rows per record, plus the header
+    end
+
+    it "exports the right stuff" do
+      address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+      derivation = address.provenance['activity']['derived_from'].first
+
+      Hippodamus.create_csv("AB")
+      csv = CSV.parse(File.open(get_file("AB.csv")).read)
+
       expect(csv[1]).to eq([
           "http://alpha.openaddressesuk.org/addresses/#{address.token}",
           address.pao,
@@ -86,11 +93,18 @@ describe Hippodamus do
       end
 
       Hippodamus.create_json("AB")
-      address = Address.last
       json = JSON.parse(File.open(get_file("AB.json")).read)
 
       expect(File.exist?(get_file("AB.json"))).to eq(true)
       expect(json.count).to eq(55)
+    end
+
+    it "exports the right stuff" do
+      address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+
+      Hippodamus.create_json("AB")
+      json = JSON.parse(File.open(get_file("AB.json")).read)
+
       expect(json.first).to eq({
         "address" => {
           "url" => "http://alpha.openaddressesuk.org/addresses/#{address.token}",
