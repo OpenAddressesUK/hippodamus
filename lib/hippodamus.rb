@@ -4,6 +4,7 @@ require 'dotenv'
 require 'zip'
 require 'fog'
 require 'jbuilder'
+require 'csv'
 require 'mongoid_address_models/require_all'
 
 Dotenv.load
