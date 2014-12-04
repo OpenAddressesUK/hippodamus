@@ -15,7 +15,7 @@ class Hippodamus
     [
       "csv",
       "json"
-    ].each do |format|
+    ].each do |type|
       postcode_areas.each do |area|
         export(type, area)
       end
