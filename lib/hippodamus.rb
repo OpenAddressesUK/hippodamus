@@ -17,6 +17,7 @@ class Hippodamus
       "json"
     ].each do |type|
       postcode_areas.each do |area|
+        puts "Exporting #{area}"
         export(type, area)
       end
 
