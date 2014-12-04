@@ -42,14 +42,6 @@ class Hippodamus
     areas
   end
 
-  def self.connection
-    @@connection = Fog::Storage.new({
-      :provider                 => 'AWS',
-      :aws_access_key_id        => ENV['AWS_ACCESS_KEY'],
-      :aws_secret_access_key    => ENV['AWS_SECRET_ACCESS_KEY']
-    })
-  end
-
   def self.export(type, area)
     if type == "csv"
       create_csv(area)
@@ -163,20 +155,10 @@ class Hippodamus
   end
 
   def self.upload(format)
-    file = directory.files.get("addresses.#{format}.zip")
-
-    if file.nil?
-      file = directory.files.create(
-        :key    => "addresses.#{format}.zip"
-      )
-    else
-      # Backup old file
-      directory.files.create(
-        :key    => "addresses-#{DateTime.now.to_s}.#{format}.zip",
-        :body   => file.body,
-        :public => true
-      )
-    end
+    filename = "#{DateTime.now.strftime("%Y-%m-%d")}-openaddressesuk-addresses.#{format}.zip"
+    file = directory.files.create(
+      key: filename
+    )
 
     # Update main file
     file.body = File.open("/tmp/addresses/addresses.#{format}.zip")
@@ -185,11 +167,11 @@ class Hippodamus
     file
   end
 
-  def self.upload_torrent(file, format)
-    torrent = directory.files.get("addresses.#{format}.torrent")
+  def self.upload_torrent(file)
+    torrent = directory.files.get("#{file.key}.torrent")
     torrent_body = open("#{file.public_url}?torrent").read
 
-    file = directory.files.create(key: "addresses.#{format}.torrent") if torrent.nil?
+    file = directory.files.create(key: "#{file.key}.torrent") if torrent.nil?
     file.body = torrent_body
     file.public = true
     file.save
@@ -197,6 +179,14 @@ class Hippodamus
 
   def self.directory
     @@directory = connection.directories.get("open-addresses")
+  end
+
+  def self.connection
+    @@connection = Fog::Storage.new({
+      :provider                 => 'AWS',
+      :aws_access_key_id        => ENV['AWS_ACCESS_KEY'],
+      :aws_secret_access_key    => ENV['AWS_SECRET_ACCESS_KEY']
+    })
   end
 
   def self.url_for(obj)

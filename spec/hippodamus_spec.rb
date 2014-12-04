@@ -165,40 +165,37 @@ describe Hippodamus do
 
   end
 
-  it "uploads to S3", :fog do
-    Hippodamus.upload("csv")
-    file = @directory.files.get("addresses.csv.zip")
+  context "upload" do
 
-    expect(file.body).to eq(File.open("/tmp/addresses/addresses.csv.zip").read)
-  end
+    before(:each) do
+      @date = "2014-01-01"
+      @filename = "#{@date}-openaddressesuk-addresses.csv.zip"
+    end
 
-  it "backs up the old version", :fog do
-    Timecop.freeze
+    it "uploads to S3", :fog do
+      Timecop.freeze(DateTime.parse(@date))
 
-    Hippodamus.upload("csv")
-    old_file = @directory.files.get("addresses.csv.zip")
+      Hippodamus.upload("csv")
+      file = @directory.files.get(@filename)
 
-    `rm -r /tmp/addresses/ > /dev/null 2>&1`
+      expect(file.body).to eq(File.open("/tmp/addresses/addresses.csv.zip").read)
 
-    Hippodamus.create_csv("AB")
-    Hippodamus.zip_by_letter("csv")
-    Hippodamus.zip_all("csv")
+      Timecop.return
+    end
 
-    new_file = Hippodamus.upload("csv")
-    backup = @directory.files.get("addresses-#{DateTime.now.to_s}.csv.zip")
+    it "uploads the torrent file", :fog, :vcr do
+      Timecop.freeze(DateTime.parse(@date))
 
-    expect(backup.body).to eq(old_file.body)
+      file = Hippodamus.upload("csv")
+      Hippodamus.upload_torrent(file)
 
-    Timecop.return
-  end
+      torrent = @directory.files.get("#{file.key}.torrent")
 
-  it "uploads the torrent file", :fog, :vcr do
-    file = Hippodamus.upload("csv")
-    Hippodamus.upload_torrent(file, "csv")
+      expect(torrent.body).to match(/d8:announce55:/)
 
-    torrent = @directory.files.get("addresses.csv.torrent")
+      Timecop.return
+    end
 
-    expect(torrent.body).to match(/d8:announce55:/)
   end
 
 end

@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: get
-    uri: https://open-addresses.s3.amazonaws.com/addresses.csv.zip?torrent
+    uri: https://open-addresses.s3.amazonaws.com/2014-01-01-openaddressesuk-addresses.csv.zip?torrent
     body:
       encoding: US-ASCII
       string: ''
@@ -19,17 +19,17 @@ http_interactions:
       message: OK
     headers:
       X-Amz-Id-2:
-      - Z15AxDmv+L+RKhtHJgzyJBPLYEx28aR7MMUFYpzD/ISd8XBOUPPefQulQbTfaV0RACpLqrzOxVw=
+      - lTNytbvwHfsAU2YxGA0wThu2+fHeX91lOs8nPdfb2cTintudFp1trUODUap5P4ix
       X-Amz-Request-Id:
-      - 3B77543B0AE80E59
+      - 8EE97645365E82CD
       Date:
-      - Tue, 11 Nov 2014 10:41:09 GMT
+      - Thu, 04 Dec 2014 09:16:07 GMT
       Content-Disposition:
-      - attachment; filename=addresses.csv.zip.torrent;
+      - attachment; filename=2014-01-01-openaddressesuk-addresses.csv.zip.torrent;
       Content-Type:
       - application/x-bittorrent
       Content-Length:
-      - '313'
+      - '366'
       Server:
       - AmazonS3
     body:
@@ -38,10 +38,12 @@ http_interactions:
         ZDg6YW5ub3VuY2U1NTpodHRwOi8vczMtdHJhY2tlci5ldS13ZXN0LTEuYW1h
         em9uYXdzLmNvbTo2OTY5L2Fubm91bmNlMTM6YW5ub3VuY2UtbGlzdGxsNTU6
         aHR0cDovL3MzLXRyYWNrZXIuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb206Njk2
-        OS9hbm5vdW5jZWVlNDppbmZvZDY6bGVuZ3RoaTU0NzFlNDpuYW1lMTc6YWRk
-        cmVzc2VzLmNzdi56aXAxMjpwaWVjZSBsZW5ndGhpMjYyMTQ0ZTY6cGllY2Vz
-        MjA6DFG98CTO82HCXBJohuAhD5SAb9wxMjp4LWFtei1idWNrZXQxNDpvcGVu
-        LWFkZHJlc3Nlczk6eC1hbXota2V5MTc6YWRkcmVzc2VzLmNzdi56aXBlZQ==
+        OS9hbm5vdW5jZWVlNDppbmZvZDY6bGVuZ3RoaTIwNmU0Om5hbWU0NDoyMDE0
+        LTAxLTAxLW9wZW5hZGRyZXNzZXN1ay1hZGRyZXNzZXMuY3N2LnppcDEyOnBp
+        ZWNlIGxlbmd0aGkyNjIxNDRlNjpwaWVjZXMyMDrWcXutN2oNdZHwHDHfNmWg
+        afSBDzEyOngtYW16LWJ1Y2tldDE0Om9wZW4tYWRkcmVzc2VzOTp4LWFtei1r
+        ZXk0NDoyMDE0LTAxLTAxLW9wZW5hZGRyZXNzZXN1ay1hZGRyZXNzZXMuY3N2
+        LnppcGVl
     http_version: 
-  recorded_at: Tue, 11 Nov 2014 10:41:08 GMT
+  recorded_at: Wed, 01 Jan 2014 00:00:00 GMT
 recorded_with: VCR 2.9.3
