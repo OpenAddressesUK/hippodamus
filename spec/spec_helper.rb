@@ -48,7 +48,8 @@ RSpec.configure do |config|
     allow(Hippodamus).to receive(:connection).and_return(Fog::Storage.new({
       :aws_access_key_id      => 'fake_access_key_id',
       :aws_secret_access_key  => 'fake_secret_access_key',
-      :provider               => 'AWS'
+      :provider               => 'AWS',
+      :region                 => 'eu-west-1'
     }))
 
     @connection = Hippodamus.connection
