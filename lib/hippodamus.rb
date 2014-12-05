@@ -180,7 +180,7 @@ class Hippodamus
   end
 
   def self.directory
-    @@directory = connection.directories.get("open-addresses")
+    @@directory = connection.directories.get(ENV['AWS_BUCKET'])
   end
 
   def self.connection
