@@ -2,7 +2,44 @@
 http_interactions:
 - request:
     method: get
-    uri: https://open-addresses.s3.amazonaws.com/2014-01-01-openaddressesuk-addresses.csv.zip?torrent
+    uri: https://s3.amazonaws.com/open-addresses/2014-01-01-openaddressesuk-addresses.csv.zip?torrent
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 301
+      message: Moved Permanently
+    headers:
+      X-Amz-Request-Id:
+      - 5618623C91D31F56
+      X-Amz-Id-2:
+      - dhNNedufaE1sKDVDnJaFnjJcK9uXzqqZcyHoEnTPKTpEMU0id1qYUvmExP7Vo8Nu
+      Content-Type:
+      - application/xml
+      Transfer-Encoding:
+      - chunked
+      Date:
+      - Fri, 05 Dec 2014 16:28:08 GMT
+      Server:
+      - AmazonS3
+    body:
+      encoding: UTF-8
+      string: |-
+        <?xml version="1.0" encoding="UTF-8"?>
+        <Error><Code>PermanentRedirect</Code><Message>The bucket you are attempting to access must be addressed using the specified endpoint. Please send all future requests to this endpoint.</Message><Bucket>open-addresses</Bucket><Endpoint>open-addresses.s3.amazonaws.com</Endpoint><RequestId>5618623C91D31F56</RequestId><HostId>dhNNedufaE1sKDVDnJaFnjJcK9uXzqqZcyHoEnTPKTpEMU0id1qYUvmExP7Vo8Nu</HostId></Error>
+    http_version: 
+  recorded_at: Wed, 01 Jan 2014 00:00:00 GMT
+- request:
+    method: get
+    uri: https://s3-eu-west-1.amazonaws.com/open-addresses/2014-01-01-openaddressesuk-addresses.csv.zip?torrent
     body:
       encoding: US-ASCII
       string: ''
@@ -19,11 +56,11 @@ http_interactions:
       message: OK
     headers:
       X-Amz-Id-2:
-      - lTNytbvwHfsAU2YxGA0wThu2+fHeX91lOs8nPdfb2cTintudFp1trUODUap5P4ix
+      - AsCz8VPMb1U1zgIFUREXZxMAiECYBEhcoG6BfORnuwWUPHWbo8ZVo3S3ln5PAy8PPvqbe01s+Jw=
       X-Amz-Request-Id:
-      - 8EE97645365E82CD
+      - D5FC394B600B738D
       Date:
-      - Thu, 04 Dec 2014 09:16:07 GMT
+      - Fri, 05 Dec 2014 16:28:37 GMT
       Content-Disposition:
       - attachment; filename=2014-01-01-openaddressesuk-addresses.csv.zip.torrent;
       Content-Type:
