@@ -9,6 +9,7 @@ require 'mongoid_address_models/require_all'
 
 Dotenv.load
 Mongoid.load!(File.join(File.dirname(__FILE__), "..", "config", "mongoid.yml"), ENV["MONGOID_ENVIRONMENT"] || :development)
+Fog.credentials = { path_style: true }
 
 class Hippodamus
   def self.perform
