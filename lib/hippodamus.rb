@@ -22,10 +22,10 @@ class Hippodamus
         export(type, area)
       end
 
-      zip_by_letter(format)
-      zip_all(format)
-      file = upload(format)
-      upload_torrent(file, format)
+      zip_by_letter(type)
+      zip_all(type)
+      file = upload(type)
+      upload_torrent(file)
       `rm -r /tmp/addresses/`
     end
   end
