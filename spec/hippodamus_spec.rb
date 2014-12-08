@@ -310,7 +310,7 @@ describe Hippodamus do
       Timecop.return
     end
 
-    it "uploads the torrent file", :fog, :vcr do
+    it "uploads the torrent file", :fog do
       Timecop.freeze(DateTime.parse(@date))
 
       stub_request(:get, "https://s3-eu-west-1.amazonaws.com/#{ENV['AWS_BUCKET']}/open_addresses_database/#{@date}-openaddressesuk-full.csv.zip?torrent").
