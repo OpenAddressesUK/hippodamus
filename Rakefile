@@ -6,6 +6,8 @@ RSpec::Core::RakeTask.new(:spec)
 
 task :default => :spec
 
-task :upload do
-  Hippodamus.perform
+namespace :hippodamus do
+  task :upload do
+    Hippodamus.perform
+  end
 end
