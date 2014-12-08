@@ -26,7 +26,7 @@ class Hippodamus
 
       zip_by_letter(type)
       zip_all(type)
-      file = upload(type)
+      file = upload(type, with_provenance)
       upload_torrent(file)
       `rm -r /tmp/addresses/`
     end
@@ -167,17 +167,22 @@ class Hippodamus
     end
   end
 
-  def self.upload(format)
-    filename = "#{DateTime.now.strftime("%Y-%m-%d")}-openaddressesuk-addresses.#{format}.zip"
+  def self.upload(format, with_provenance)
+    filename = filename(format, with_provenance)
     file = directory.files.create(
       key: filename
     )
 
     # Update main file
-    file.body = File.open("/tmp/addresses/addresses.#{format}.zip")
+    file.body = File.open("/tmp/addresses/addresses.#{format}.zip").read
     file.public = true
     file.save
     file
+  end
+
+  def self.filename(format, with_provenance)
+    type = with_provenance === false ? "addresses-only" : "full"
+    filename = "#{DateTime.now.strftime("%Y-%m-%d")}-openaddressesuk-#{type}.#{format}.zip"
   end
 
   def self.upload_torrent(file)
