@@ -278,7 +278,7 @@ describe Hippodamus do
     it "uploads the torrent file", :fog, :vcr do
       Timecop.freeze(DateTime.parse(@date))
 
-      stub_request(:get, "https://s3-eu-west-1.amazonaws.com/download.openaddressesuk.org/2014-01-01-openaddressesuk-addresses.csv.zip?torrent").
+      stub_request(:get, "https://s3-eu-west-1.amazonaws.com/#{ENV['AWS_BUCKET']}/#{@date}-openaddressesuk-addresses.csv.zip?torrent").
               to_return(body: "TORRENT PLACEHOLDER")
 
       file = Hippodamus.upload("csv")
