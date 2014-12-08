@@ -54,7 +54,7 @@ RSpec.configure do |config|
 
     @connection = Hippodamus.connection
     @directory = @connection.directories.create(
-      key: "open-addresses",
+      key: ENV['AWS_BUCKET'],
       public: true
     )
 
