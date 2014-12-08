@@ -14,11 +14,13 @@ Fog.credentials = { path_style: true }
 class Hippodamus
   def self.perform
     [
-      "csv" => true,
-      "csv" => false,
-      "json" => true,
-      "json" => false
-    ].each do |type, with_provenance|
+      ["csv", true],
+      ["csv", false],
+      ["json", true],
+      ["json", false]
+    ].each do |array|
+      type = array[0]
+      with_provenance = array[1]
       postcode_areas.each do |area|
         puts "Exporting #{area}"
         export(type, area, with_provenance)
