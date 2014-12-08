@@ -63,7 +63,7 @@ class Hippodamus
       addresses.each do |address|
         if with_provenance === true
           address.provenance["activity"]["derived_from"].each do |derivation|
-            csv << csv_row(address, derivation, with_provenance)
+            csv << csv_row(address, derivation, true)
           end
         else
           csv << csv_row(address, nil, false)
