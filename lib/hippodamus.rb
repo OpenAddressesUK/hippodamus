@@ -170,7 +170,7 @@ class Hippodamus
   def self.upload(format, with_provenance)
     filename = filename(format, with_provenance)
     file = directory.files.create(
-      key: filename
+      key: "open_addresses_database/#{filename}"
     )
 
     # Update main file
