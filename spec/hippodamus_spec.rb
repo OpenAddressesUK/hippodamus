@@ -278,12 +278,15 @@ describe Hippodamus do
     it "uploads the torrent file", :fog, :vcr do
       Timecop.freeze(DateTime.parse(@date))
 
+      stub_request(:get, "https://s3-eu-west-1.amazonaws.com/download.openaddressesuk.org/2014-01-01-openaddressesuk-addresses.csv.zip?torrent").
+              to_return(body: "TORRENT PLACEHOLDER")
+
       file = Hippodamus.upload("csv")
       Hippodamus.upload_torrent(file)
 
       torrent = @directory.files.get("#{file.key}.torrent")
 
-      expect(torrent.body).to match(/d8:announce55:/)
+      expect(torrent.body).to match(/TORRENT PLACEHOLDER/)
 
       Timecop.return
     end
