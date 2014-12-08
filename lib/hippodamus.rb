@@ -14,12 +14,14 @@ Fog.credentials = { path_style: true }
 class Hippodamus
   def self.perform
     [
-      "csv",
-      "json"
-    ].each do |type|
+      "csv" => true,
+      "csv" => false,
+      "json" => true,
+      "json" => false
+    ].each do |type, with_provenance|
       postcode_areas.each do |area|
         puts "Exporting #{area}"
-        export(type, area)
+        export(type, area, with_provenance)
       end
 
       zip_by_letter(type)
@@ -45,29 +47,33 @@ class Hippodamus
     areas
   end
 
-  def self.export(type, area)
+  def self.export(type, area, with_provenance)
     if type == "csv"
-      create_csv(area)
+      create_csv(area, with_provenance)
     else
-      create_json(area)
+      create_json(area, with_provenance)
     end
   end
 
-  def self.create_csv(area)
+  def self.create_csv(area, with_provenance)
     addresses = Address.where("postcode.name" => /^#{area}[0-9]{1,2}[A-Z]?.*/i)
     Dir.mkdir("/tmp/addresses") unless File.exist?("/tmp/addresses")
     CSV.open("/tmp/addresses/#{area}.csv", "wb") do |csv|
-      csv << csv_header
+      csv << csv_header(with_provenance)
       addresses.each do |address|
-        address.provenance["activity"]["derived_from"].each do |derivation|
-          csv << csv_row(address, derivation)
+        if with_provenance === true
+          address.provenance["activity"]["derived_from"].each do |derivation|
+            csv << csv_row(address, derivation, with_provenance)
+          end
+        else
+          csv << csv_row(address, nil, false)
         end
       end
     end
   end
 
-  def self.csv_row(address, derivation)
-    [
+  def self.csv_row(address, derivation, with_provenance)
+    row = [
       url_for(address),
       address.pao,
       address.sao,
@@ -78,36 +84,42 @@ class Hippodamus
       address.town.try(:name),
       url_for(address.town),
       address.postcode.try(:name),
-      url_for(address.postcode),
-      address.provenance['activity']['executed_at'],
+      url_for(address.postcode)
+    ]
+    row.push(address.provenance['activity']['executed_at'],
       address.provenance['activity']['processing_scripts'],
       derivation['urls'].first,
       derivation['downloaded_at'],
-      derivation['processing_script']
-    ]
+      derivation['processing_script']) if with_provenance === true
+    row
   end
 
-  def self.csv_header
-    [
+  def self.csv_header(with_provenance)
+    header = [
       "url","pao","sao","street.name","street.url","locality.name",
       "locality.url","town.name","town.url","postcode.name",
-      "postcode.url","provenance.activity.executed_at",
+      "postcode.url"
+    ]
+    header << [
+      "provenance.activity.executed_at",
       "provenance.processing_script","provenance.derived_from.url",
       "provenance.derived_from.downloaded_at",
       "provenance.derived_from.processing_script"
-    ]
+    ] if with_provenance === true
+    header
   end
 
-  def self.create_json(area)
+  def self.create_json(area, with_provenance)
+    return nil if File.exist?("/tmp/addresses/#{area}.json")
     Dir.mkdir("/tmp/addresses") unless File.exist?("/tmp/addresses")
     addresses = Address.where("postcode.name" => /^#{area}[0-9]{1,2}[A-Z]?.*/i)
-    json = build_json(addresses)
+    json = build_json(addresses, with_provenance)
     File.open("/tmp/addresses/#{area}.json","w") do |f|
       f.write(json)
     end
   end
 
-  def self.build_json(addresses)
+  def self.build_json(addresses, with_provenance)
     Jbuilder.encode do |json|
       json.array! addresses do |address|
         json.address do
@@ -118,7 +130,7 @@ class Hippodamus
           json.locality address_part(json, address.locality)
           json.town address_part(json, address.town)
           json.postcode address_part(json, address.postcode)
-          json.provenance address.provenance
+          json.provenance address.provenance if with_provenance === true
         end
       end
     end
