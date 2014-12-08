@@ -100,12 +100,10 @@ class Hippodamus
       "locality.url","town.name","town.url","postcode.name",
       "postcode.url"
     ]
-    header << [
-      "provenance.activity.executed_at",
+    header.push("provenance.activity.executed_at",
       "provenance.processing_script","provenance.derived_from.url",
       "provenance.derived_from.downloaded_at",
-      "provenance.derived_from.processing_script"
-    ] if with_provenance === true
+      "provenance.derived_from.processing_script") if with_provenance === true
     header
   end
 
