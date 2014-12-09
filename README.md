@@ -19,17 +19,15 @@ Add a file named `.env` with the following:
 
 ```
 WIKIPEDIA_URL: https://en.wikipedia.org/wiki/List_of_postcode_areas_in_the_United_Kingdom
-MONGO_DB: {The database name of your theodolite database}
-MONGO_HOST: {Your theodolite database host}
-MONGO_USERNAME: {Your theodolite database password (if applicable)}
-MONGO_PASSWORD: {Your theodolite database password (if applicable)}
+MONGOLAB_URI: {The URI for connecting to the mongodb instance}
 AWS_ACCESS_KEY: {Your Amazon Webservices access key}
 AWS_SECRET_ACCESS_KEY: {Your Amazon Webservice secret access key}
+AWS_BUCKET: {The bucket you intend to store the dumps in}
 ```
 
 Run the following command:
 
-`rake upload`
+`rake hippodamus:upload`
 
 ##Licence
 This code is open source under the MIT license. See the [LICENSE.md](LICENSE.md) file for full details.
