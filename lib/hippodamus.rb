@@ -138,13 +138,21 @@ class Hippodamus
 
   def self.address_part(json, address, part)
     json.set! part do
+      address_part_name(json, address, part)
+      json.url url_for(address.send(part))
+    end
+  end
+
+  def self.address_part_name(json, address, part)
+    if part == "postcode"
+      json.name (address.send(part).try(:name))
+    else
       json.name do
         json.en [
           address.send(part).try(:name)
         ]
         json.cy []
       end
-      json.url url_for(address.send(part))
     end
   end
 

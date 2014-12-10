@@ -181,10 +181,7 @@ describe Hippodamus do
               "url" => "http://alpha.openaddressesuk.org/towns/#{address.town.token}"
             },
             "postcode" => {
-              "name" => {
-                "en"=>[address.postcode.name],
-                "cy"=>[]
-              },
+              "name" => address.postcode.name,
               "url" => "http://alpha.openaddressesuk.org/postcodes/#{address.postcode.token}"
             },
             "provenance" => JSON.parse(address.provenance.to_json)
@@ -238,10 +235,7 @@ describe Hippodamus do
               "url" => "http://alpha.openaddressesuk.org/towns/#{address.town.token}"
             },
             "postcode" => {
-              "name" => {
-                "en"=>[address.postcode.name],
-                "cy"=>[]
-              },
+              "name" => address.postcode.name,
               "url" => "http://alpha.openaddressesuk.org/postcodes/#{address.postcode.token}"
             }
           }
@@ -281,10 +275,7 @@ describe Hippodamus do
               "url" => "http://alpha.openaddressesuk.org/towns/#{address.town.token}"
             },
             "postcode" => {
-              "name" => {
-                "en"=>[address.postcode.name],
-                "cy"=>[]
-              },
+              "name" => address.postcode.name,
               "url" => "http://alpha.openaddressesuk.org/postcodes/#{address.postcode.token}"
             }
           }
