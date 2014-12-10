@@ -126,25 +126,25 @@ class Hippodamus
           json.url url_for(address)
           json.sao address.sao
           json.pao address.pao
-          json.street address_part(json, address.street)
-          json.locality address_part(json, address.locality)
-          json.town address_part(json, address.town)
-          json.postcode address_part(json, address.postcode)
+          json.street address_part(json, address, "street")
+          json.locality address_part(json, address, "locality")
+          json.town address_part(json, address, "town")
+          json.postcode address_part(json, address, "postcode")
           json.provenance address.provenance if with_provenance === true
         end
       end
     end
   end
 
-  def self.address_part(json, part)
-    json.set! part.class.to_s.downcase do
+  def self.address_part(json, address, part)
+    json.set! part do
       json.name do
         json.en [
-          part.try(:name)
+          address.send(part).try(:name)
         ]
         json.cy []
       end
-      json.url url_for(part)
+      json.url url_for(address.send(part))
     end
   end
 

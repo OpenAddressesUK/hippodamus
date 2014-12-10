@@ -248,6 +248,49 @@ describe Hippodamus do
         })
       end
 
+      it "exports the right stuff when there is no locality" do
+        address = FactoryGirl.create(:address_with_provenance, locality: nil, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+
+        Hippodamus.create_json("AB", false)
+        json = JSON.parse(File.open(get_file("AB.json")).read)
+
+        expect(json.first).to eq({
+          "address" => {
+            "url" => "http://alpha.openaddressesuk.org/addresses/#{address.token}",
+            "sao" => address.sao,
+            "pao" => address.pao,
+            "street" => {
+              "name" => {
+                "en"=>[address.street.name],
+                "cy"=>[]
+              },
+              "url" => "http://alpha.openaddressesuk.org/streets/#{address.street.token}"
+            },
+            "locality" => {
+              "name" => {
+                "en"=>[nil],
+                "cy"=>[]
+              },
+              "url" => nil
+            },
+            "town" => {
+              "name" => {
+                "en"=>[address.town.name],
+                "cy"=>[]
+              },
+              "url" => "http://alpha.openaddressesuk.org/towns/#{address.town.token}"
+            },
+            "postcode" => {
+              "name" => {
+                "en"=>[address.postcode.name],
+                "cy"=>[]
+              },
+              "url" => "http://alpha.openaddressesuk.org/postcodes/#{address.postcode.token}"
+            }
+          }
+        })
+      end
+
       it "creates the correct filename" do
         Timecop.freeze(DateTime.parse("2014-01-01"))
 
