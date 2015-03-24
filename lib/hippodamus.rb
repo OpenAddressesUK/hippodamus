@@ -21,17 +21,30 @@ class Hippodamus
     ].each do |array|
       type = array[0]
       with_provenance = array[1]
-      postcode_areas.each do |area|
-        puts "Exporting #{area}"
-        export(type, area, with_provenance)
-      end
-
-      zip_by_letter(type)
-      zip_all(type)
-      file = upload(type, with_provenance)
-      upload_torrent(file)
-      `rm -r /tmp/addresses/`
+      single_file(type, with_provenance)
+      seperatated_file(type, with_provenance)
     end
+  end
+
+  def self.single_file(type, with_provenance)
+    export(type, with_provenance)
+    zip_single_file(type)
+    file = upload(type, with_provenance)
+    upload_torrent(file)
+    `rm -r /tmp/addresses/`
+  end
+
+  def self.seperatated_file(type, with_provenance)
+    postcode_areas.each do |area|
+      puts "Exporting #{area}"
+      export(type, with_provenance, area)
+    end
+
+    zip_by_letter(type)
+    zip_all(type)
+    file = upload(type, with_provenance)
+    upload_torrent(file)
+    `rm -r /tmp/addresses/`
   end
 
   def self.postcode_areas
@@ -49,7 +62,7 @@ class Hippodamus
     areas
   end
 
-  def self.export(type, area, with_provenance)
+  def self.export(type, with_provenance, area = nil)
     if type == "csv"
       create_csv(area, with_provenance)
     else
@@ -58,9 +71,13 @@ class Hippodamus
   end
 
   def self.create_csv(area, with_provenance)
-    addresses = Address.where("postcode.name" => /^#{area}[0-9]{1,2}[A-Z]?.*/i)
+    if area.nil?
+      addresses = Address.all
+    else
+      addresses = Address.where("postcode.name" => /^#{area}[0-9]{1,2}[A-Z]?.*/i)
+    end
     Dir.mkdir("/tmp/addresses") unless File.exist?("/tmp/addresses")
-    CSV.open("/tmp/addresses/#{area}.csv", "wb") do |csv|
+    CSV.open("/tmp/addresses/#{area || "addresses"}.csv", "wb") do |csv|
       csv << csv_header(with_provenance)
       addresses.each do |address|
         if with_provenance === true
@@ -112,9 +129,13 @@ class Hippodamus
   def self.create_json(area, with_provenance)
     return nil if File.exist?("/tmp/addresses/#{area}.json")
     Dir.mkdir("/tmp/addresses") unless File.exist?("/tmp/addresses")
-    addresses = Address.where("postcode.name" => /^#{area}[0-9]{1,2}[A-Z]?.*/i)
+    if area.nil?
+      addresses = Address.all
+    else
+      addresses = Address.where("postcode.name" => /^#{area}[0-9]{1,2}[A-Z]?.*/i)
+    end
     json = build_json(addresses, with_provenance)
-    File.open("/tmp/addresses/#{area}.json","w") do |f|
+    File.open("/tmp/addresses/#{area || "addresses"}.json","w") do |f|
       f.write(json)
     end
   end
@@ -166,6 +187,12 @@ class Hippodamus
           end
         end
       end
+    end
+  end
+
+  def self.zip_single_file(format)
+    Zip::File.open("/tmp/addresses/addresses.#{format}.zip", Zip::File::CREATE) do |zipfile|
+      zipfile.add(File.basename("addresses.#{format}"), "/tmp/addresses/addresses.#{format}")
     end
   end
 
