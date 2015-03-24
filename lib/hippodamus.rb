@@ -12,17 +12,11 @@ Mongoid.load!(File.join(File.dirname(__FILE__), "..", "config", "mongoid.yml"), 
 Fog.credentials = { path_style: true }
 
 class Hippodamus
-  def self.perform
-    [
-      ["csv", true],
-      ["csv", false],
-      ["json", true],
-      ["json", false]
-    ].each do |array|
-      type = array[0]
-      with_provenance = array[1]
-      single_file(type, with_provenance)
+  def self.perform(type, with_provenance, split = true)
+    if split === true
       seperatated_file(type, with_provenance)
+    else
+      single_file(type, with_provenance)
     end
   end
 
