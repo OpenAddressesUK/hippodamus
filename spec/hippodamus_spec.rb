@@ -30,6 +30,21 @@ describe Hippodamus do
         expect(csv.count).to eq((55 * 4) + 1) # We expect 4 rows per record, plus the header
       end
 
+      it "exports addresses for all areas" do
+        10.times do |i|
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "EF1 123"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123"))
+        end
+
+        Hippodamus.create_csv(nil, true)
+        csv = CSV.parse(File.open(get_file("addresses.csv")).read)
+
+        expect(File.exist?(get_file("addresses.csv"))).to eq(true)
+        expect(csv.count).to eq((40 * 4) + 1) # We expect 4 rows per record, plus the header
+      end
+
       it "exports the right stuff" do
         address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
         derivation = address.provenance['activity']['derived_from'].first
@@ -80,6 +95,21 @@ describe Hippodamus do
 
         expect(File.exist?(get_file("AB.csv"))).to eq(true)
         expect(csv.count).to eq(56)
+      end
+
+      it "exports addresses for all areas" do
+        10.times do |i|
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "EF1 123"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123"))
+        end
+
+        Hippodamus.create_csv(nil, false)
+        csv = CSV.parse(File.open(get_file("addresses.csv")).read)
+
+        expect(File.exist?(get_file("addresses.csv"))).to eq(true)
+        expect(csv.count).to eq(41) # We expect 4 rows per record, plus the header
       end
 
       it "exports the right stuff" do
@@ -135,6 +165,18 @@ describe Hippodamus do
       Hippodamus.zip_all(@format)
 
       expect(File.exist?(get_file("addresses.csv.zip"))).to eq(true)
+    end
+
+    it "zips a single file" do
+      Hippodamus.create_csv(nil, false)
+      Hippodamus.zip_single_file(@format)
+
+      expect(File.exist?(get_file("addresses.csv.zip"))).to eq(true)
+      Zip::File.open(get_file("addresses.csv.zip")) do |zip|
+        entry = zip.glob('*.csv')
+        expect(entry.count).to eq(1)
+        expect(entry.first.name).to eq("addresses.csv")
+      end
     end
 
   end
@@ -305,6 +347,21 @@ describe Hippodamus do
       expect(json.count).to eq(55)
     end
 
+    it "exports addresses for all areas" do
+      10.times do |i|
+        FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+        FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123"))
+        FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "EF1 123"))
+        FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123"))
+      end
+
+      Hippodamus.create_json(nil, true)
+      json = JSON.parse(File.open(get_file("addresses.json")).read)
+
+      expect(File.exist?(get_file("addresses.json"))).to eq(true)
+      expect(json.count).to eq(40)
+    end
+
     it "zips all exant files by letter" do
       Hippodamus.create_json("WS", false)
       Hippodamus.create_json("WV", false)
@@ -323,6 +380,18 @@ describe Hippodamus do
       Hippodamus.zip_all(@format)
 
       expect(File.exist?(get_file("addresses.json.zip"))).to eq(true)
+    end
+
+    it "zips a single file" do
+      Hippodamus.create_json(nil, false)
+      Hippodamus.zip_single_file(@format)
+
+      expect(File.exist?(get_file("addresses.json.zip"))).to eq(true)
+      Zip::File.open(get_file("addresses.json.zip")) do |zip|
+        entry = zip.glob('*.json')
+        expect(entry.count).to eq(1)
+        expect(entry.first.name).to eq("addresses.json")
+      end
     end
 
   end
