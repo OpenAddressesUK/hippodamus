@@ -16,3 +16,10 @@ before_install:
 - sudo apt-get install mongodb-org
 before_script:
 - until nc -z localhost 27017; do echo Waiting for MongoDB; sleep 1; done
+deploy:
+  provider: heroku
+  api_key:
+    secure: m8HMOlpAmJjWSCtrRAe3zmZLYKnNh+VHMEffCzzXDeGuRZ3pKFLwTRJeuBz3b+U/BU9CegwmKYVI1jUf9YoV6Rkf4loWRMP5RtFPGyVMczE+GzsIUldXOgdNwo7tfYmaCc6H8FnPLqHp6JBALvppzK+7vunExE6NspTkHvALWQU=
+  app: oa-hippodamus
+  on:
+    repo: OpenAddressesUK/hippodamus
