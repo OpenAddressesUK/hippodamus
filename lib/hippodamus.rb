@@ -14,7 +14,7 @@ Fog.credentials = { path_style: true }
 class Hippodamus
   def self.perform(type, with_provenance, split = true)
     if split === true
-      seperatated_file(type, with_provenance)
+      seperated_file(type, with_provenance)
     else
       single_file(type, with_provenance)
     end
@@ -28,7 +28,7 @@ class Hippodamus
     `rm -r /tmp/addresses/`
   end
 
-  def self.seperatated_file(type, with_provenance)
+  def self.seperated_file(type, with_provenance)
     postcode_areas.each do |area|
       puts "Exporting #{area}"
       export(type, with_provenance, area)
