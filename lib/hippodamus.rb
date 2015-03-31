@@ -23,7 +23,7 @@ class Hippodamus
   def self.single_file(type, with_provenance)
     export(type, with_provenance)
     zip_single_file(type)
-    file = upload(type, "single", with_provenance)
+    file = upload(type, with_provenance)
     upload_torrent(file)
     `rm -r /tmp/addresses/`
   end
@@ -36,7 +36,7 @@ class Hippodamus
 
     zip_by_letter(type)
     zip_all(type)
-    file = upload(type, "split", with_provenance)
+    file = upload(type, with_provenance, "split")
     upload_torrent(file)
     `rm -r /tmp/addresses/`
   end
@@ -198,7 +198,7 @@ class Hippodamus
     end
   end
 
-  def self.upload(format, type, with_provenance)
+  def self.upload(format, with_provenance, type = nil)
     filename = filename(format, type, with_provenance)
     file = directory.files.create(
       key: "open_addresses_database/#{filename}"
@@ -212,8 +212,9 @@ class Hippodamus
   end
 
   def self.filename(format, type, with_provenance)
+    type = "-#{type}" unless type.nil?
     provenance = with_provenance === false ? "addresses-only" : "full"
-    filename = "#{DateTime.now.strftime("%Y-%m-%d")}-openaddressesuk-#{type}-#{provenance}.#{format}.zip"
+    filename = "#{DateTime.now.strftime("%Y-%m-%d")}-openaddressesuk-#{provenance}#{type}.#{format}.zip"
   end
 
   def self.upload_torrent(file)
