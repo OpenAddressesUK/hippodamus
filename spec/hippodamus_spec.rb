@@ -72,15 +72,6 @@ describe Hippodamus do
           ])
       end
 
-      it "creates the correct filename" do
-        Timecop.freeze(DateTime.parse("2014-01-01"))
-
-        filename = Hippodamus.filename("csv", "single", true)
-        expect(filename).to eq("2014-01-01-openaddressesuk-single-full.csv.zip")
-
-        Timecop.return
-      end
-
     end
 
     context "without provenance" do
@@ -131,15 +122,6 @@ describe Hippodamus do
             address.postcode.try(:name),
             "http://alpha.openaddressesuk.org/postcodes/#{address.postcode.try(:token)}"
           ])
-      end
-
-      it "creates the correct filename" do
-        Timecop.freeze(DateTime.parse("2014-01-01"))
-
-        filename = Hippodamus.filename("csv", "single", false)
-        expect(filename).to eq("2014-01-01-openaddressesuk-single-addresses-only.csv.zip")
-
-        Timecop.return
       end
 
     end
@@ -231,15 +213,6 @@ describe Hippodamus do
         })
       end
 
-      it "creates the correct filename" do
-        Timecop.freeze(DateTime.parse("2014-01-01"))
-
-        filename = Hippodamus.filename("json", "single", true)
-        expect(filename).to eq("2014-01-01-openaddressesuk-single-full.json.zip")
-
-        Timecop.return
-      end
-
     end
 
     context "without provenance" do
@@ -322,15 +295,6 @@ describe Hippodamus do
             }
           }
         })
-      end
-
-      it "creates the correct filename" do
-        Timecop.freeze(DateTime.parse("2014-01-01"))
-
-        filename = Hippodamus.filename("json", "single", false)
-        expect(filename).to eq("2014-01-01-openaddressesuk-single-addresses-only.json.zip")
-
-        Timecop.return
       end
 
     end
@@ -416,10 +380,10 @@ describe Hippodamus do
     it "uploads the torrent file", :fog do
       Timecop.freeze(DateTime.parse(@date))
 
-      stub_request(:get, "https://s3-eu-west-1.amazonaws.com/#{ENV['AWS_BUCKET']}/open_addresses_database/#{@date}-openaddressesuk-split-full.csv.zip?torrent").
+      stub_request(:get, "https://s3-eu-west-1.amazonaws.com/#{ENV['AWS_BUCKET']}/open_addresses_database/#{@date}-openaddressesuk-full-split.csv.zip?torrent").
               to_return(body: "TORRENT PLACEHOLDER")
 
-      file = Hippodamus.upload("csv", "split", true)
+      file = Hippodamus.upload("csv", true, "split")
       Hippodamus.upload_torrent(file)
 
       torrent = @directory.files.get("#{file.key}.torrent")
@@ -430,5 +394,77 @@ describe Hippodamus do
     end
 
   end
+
+  context "creating filenames" do
+    [
+      {
+        format: "csv",
+        split: nil,
+        provenance: false,
+        name: "Addresses only as a single CSV file",
+        result: "2014-01-01-openaddressesuk-addresses-only.csv.zip"
+      },
+      {
+        format: "json",
+        split: nil,
+        provenance: false,
+        name: "Addresses only as a single JSON file",
+        result: "2014-01-01-openaddressesuk-addresses-only.json.zip"
+      },
+      {
+        format: "csv",
+        split: "split",
+        provenance: false,
+        name: "Addresses only as a split CSV file",
+        result: "2014-01-01-openaddressesuk-addresses-only-split.csv.zip"
+      },
+      {
+        format: "json",
+        split: "split",
+        provenance: false,
+        name: "Addresses only as a split JSON file",
+        result: "2014-01-01-openaddressesuk-addresses-only-split.json.zip"
+      },
+      {
+        format: "csv",
+        split: nil,
+        provenance: true,
+        name: "Full export as a single CSV file",
+        result: "2014-01-01-openaddressesuk-full.csv.zip"
+      },
+      {
+        format: "json",
+        split: nil,
+        provenance: true,
+        name: "Full export as a single JSON file",
+        result: "2014-01-01-openaddressesuk-full.json.zip"
+      },
+      {
+        format: "csv",
+        split: "split",
+        provenance: true,
+        name: "Full export as a split CSV file",
+        result: "2014-01-01-openaddressesuk-full-split.csv.zip"
+      },
+      {
+        format: "json",
+        split: "split",
+        provenance: true,
+        name: "Full export as a split JSON file",
+        result: "2014-01-01-openaddressesuk-full-split.json.zip"
+      }
+    ].each do |scenario|
+      it "creates the correct filename for #{scenario[:name]}" do
+        Timecop.freeze(DateTime.parse("2014-01-01"))
+
+        filename = Hippodamus.filename(scenario[:format], scenario[:split], scenario[:provenance])
+        expect(filename).to eq(scenario[:result])
+
+        Timecop.return
+      end
+    end
+  end
+
+
 
 end
