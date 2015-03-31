@@ -24,7 +24,6 @@ class Hippodamus
     export(type, with_provenance)
     zip_single_file(type)
     file = upload(type, with_provenance)
-    upload_torrent(file)
     `rm -r /tmp/addresses/`
   end
 
@@ -37,7 +36,6 @@ class Hippodamus
     zip_by_letter(type)
     zip_all(type)
     file = upload(type, with_provenance, "split")
-    upload_torrent(file)
     `rm -r /tmp/addresses/`
   end
 
@@ -215,16 +213,6 @@ class Hippodamus
     type = "-#{type}" unless type.nil?
     provenance = with_provenance === false ? "addresses-only" : "full"
     filename = "#{DateTime.now.strftime("%Y-%m-%d")}-openaddressesuk-#{provenance}#{type}.#{format}.zip"
-  end
-
-  def self.upload_torrent(file)
-    torrent = directory.files.get("#{file.key}.torrent")
-    torrent_body = open("#{file.public_url}?torrent").read
-
-    file = directory.files.create(key: "#{file.key}.torrent") if torrent.nil?
-    file.body = torrent_body
-    file.public = true
-    file.save
   end
 
   def self.directory
