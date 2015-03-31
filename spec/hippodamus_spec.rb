@@ -376,23 +376,6 @@ describe Hippodamus do
 
       Timecop.return
     end
-
-    it "uploads the torrent file", :fog do
-      Timecop.freeze(DateTime.parse(@date))
-
-      stub_request(:get, "https://s3-eu-west-1.amazonaws.com/#{ENV['AWS_BUCKET']}/open_addresses_database/#{@date}-openaddressesuk-full-split.csv.zip?torrent").
-              to_return(body: "TORRENT PLACEHOLDER")
-
-      file = Hippodamus.upload("csv", true, "split")
-      Hippodamus.upload_torrent(file)
-
-      torrent = @directory.files.get("#{file.key}.torrent")
-
-      expect(torrent.body).to match(/TORRENT PLACEHOLDER/)
-
-      Timecop.return
-    end
-
   end
 
   context "creating filenames" do
