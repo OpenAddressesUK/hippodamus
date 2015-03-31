@@ -75,8 +75,8 @@ describe Hippodamus do
       it "creates the correct filename" do
         Timecop.freeze(DateTime.parse("2014-01-01"))
 
-        filename = Hippodamus.filename("csv", true)
-        expect(filename).to eq("2014-01-01-openaddressesuk-full.csv.zip")
+        filename = Hippodamus.filename("csv", "single", true)
+        expect(filename).to eq("2014-01-01-openaddressesuk-single-full.csv.zip")
 
         Timecop.return
       end
@@ -136,8 +136,8 @@ describe Hippodamus do
       it "creates the correct filename" do
         Timecop.freeze(DateTime.parse("2014-01-01"))
 
-        filename = Hippodamus.filename("csv", false)
-        expect(filename).to eq("2014-01-01-openaddressesuk-addresses-only.csv.zip")
+        filename = Hippodamus.filename("csv", "single", false)
+        expect(filename).to eq("2014-01-01-openaddressesuk-single-addresses-only.csv.zip")
 
         Timecop.return
       end
@@ -234,8 +234,8 @@ describe Hippodamus do
       it "creates the correct filename" do
         Timecop.freeze(DateTime.parse("2014-01-01"))
 
-        filename = Hippodamus.filename("json", true)
-        expect(filename).to eq("2014-01-01-openaddressesuk-full.json.zip")
+        filename = Hippodamus.filename("json", "single", true)
+        expect(filename).to eq("2014-01-01-openaddressesuk-single-full.json.zip")
 
         Timecop.return
       end
@@ -327,8 +327,8 @@ describe Hippodamus do
       it "creates the correct filename" do
         Timecop.freeze(DateTime.parse("2014-01-01"))
 
-        filename = Hippodamus.filename("json", false)
-        expect(filename).to eq("2014-01-01-openaddressesuk-addresses-only.json.zip")
+        filename = Hippodamus.filename("json", "single", false)
+        expect(filename).to eq("2014-01-01-openaddressesuk-single-addresses-only.json.zip")
 
         Timecop.return
       end
@@ -405,7 +405,7 @@ describe Hippodamus do
     it "uploads to S3", :fog do
       Timecop.freeze(DateTime.parse(@date))
 
-      file = Hippodamus.upload("csv", true)
+      file = Hippodamus.upload("csv", "split", true)
       md5 = Digest::MD5.hexdigest(file.body)
 
       expect(md5).to eq(Digest::MD5.file('/tmp/addresses/addresses.csv.zip').hexdigest)
@@ -416,10 +416,10 @@ describe Hippodamus do
     it "uploads the torrent file", :fog do
       Timecop.freeze(DateTime.parse(@date))
 
-      stub_request(:get, "https://s3-eu-west-1.amazonaws.com/#{ENV['AWS_BUCKET']}/open_addresses_database/#{@date}-openaddressesuk-full.csv.zip?torrent").
+      stub_request(:get, "https://s3-eu-west-1.amazonaws.com/#{ENV['AWS_BUCKET']}/open_addresses_database/#{@date}-openaddressesuk-split-full.csv.zip?torrent").
               to_return(body: "TORRENT PLACEHOLDER")
 
-      file = Hippodamus.upload("csv", true)
+      file = Hippodamus.upload("csv", "split", true)
       Hippodamus.upload_torrent(file)
 
       torrent = @directory.files.get("#{file.key}.torrent")
