@@ -3,7 +3,7 @@ Hippodamus
 
 This repository is about Open Addresses' publishing scripts that create the downloadable versions of Open Addresses' database. It is named "hippodamus", after Hippodamus of Miletus: an [ancient Greek architect, urban planner, physician, mathematician, meteorologist and philosopher commonly is considered to be the "father" of urban planning](https://en.wikipedia.org/wiki/Hippodamus_of_Miletus). Hippodamus is part of the solution Open Addresses deployed for the Alpha stage of our services. Read about Hippodamus [here](http://openaddressesuk.org/docs) or learn about Open Addresses in general [here](http://openaddressesuk.org).
 
-Hippodamus is a Ruby script that exports the MongoDB database from [Theodolite](https://github.com/OpenAddressesUK/theodolite), uploads it to Amazon S3 and creates a `.torrent` file for seeding the data from S3.
+Hippodamus is a Ruby script that exports the MongoDB database from [Theodolite](https://github.com/OpenAddressesUK/theodolite) and uploads it to Amazon S3.
 
 # Setup
 
