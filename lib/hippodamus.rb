@@ -54,9 +54,8 @@ class Hippodamus
         file.puts File.readlines(f)[1..-1]
       end
       file.close
-      # Read the first line of the
     else
-      `cd /tmp/addresses/ ; cat *json | #{ENV['JQ']} -s add > addresses.json`
+      `cat /tmp/addresses/*json | #{ENV['JQ']} -s add > /tmp/addresses/addresses.json`
     end
   end
 
