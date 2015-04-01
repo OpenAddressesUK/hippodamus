@@ -336,6 +336,27 @@ describe Hippodamus do
       expect(json.count).to eq(40)
     end
 
+    it "combines multiple files into one" do
+      10.times do |i|
+        FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+        FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123"))
+        FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "EF1 123"))
+        FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123"))
+      end
+
+      Hippodamus.create_json("AB", true)
+      Hippodamus.create_json("CD", true)
+      Hippodamus.create_json("EF", true)
+      Hippodamus.create_json("GH", true)
+
+      Hippodamus.combine("json", true)
+
+      json = JSON.parse(File.open(get_file("addresses.json")).read)
+
+      expect(File.exist?(get_file("addresses.json"))).to eq(true)
+      expect(json.count).to eq(40)
+    end
+
     it "zips all exant files by letter" do
       Hippodamus.create_json("WS", false)
       Hippodamus.create_json("WV", false)
