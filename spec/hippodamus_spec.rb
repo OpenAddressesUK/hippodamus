@@ -30,21 +30,6 @@ describe Hippodamus do
         expect(csv.count).to eq((55 * 4) + 1) # We expect 4 rows per record, plus the header
       end
 
-      it "exports addresses for all areas" do
-        10.times do |i|
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123"))
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "EF1 123"))
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123"))
-        end
-
-        Hippodamus.create_csv(nil, true)
-        csv = CSV.parse(File.open(get_file("addresses.csv")).read)
-
-        expect(File.exist?(get_file("addresses.csv"))).to eq(true)
-        expect(csv.count).to eq((40 * 4) + 1) # We expect 4 rows per record, plus the header
-      end
-
       it "exports the right stuff" do
         address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
         derivation = address.provenance['activity']['derived_from'].first
@@ -72,6 +57,26 @@ describe Hippodamus do
           ])
       end
 
+      it "combines multiple files into one" do
+        10.times do |i|
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "EF1 123"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123"))
+        end
+
+        Hippodamus.create_csv("AB", true)
+        Hippodamus.create_csv("CD", true)
+        Hippodamus.create_csv("EF", true)
+        Hippodamus.create_csv("GH", true)
+
+        Hippodamus.combine("csv", true)
+
+        csv = CSV.parse(File.open(get_file("addresses.csv")).read)
+
+        expect(csv.count).to eq((40 * 4) + 1) # We expect 4 rows per record, plus the header
+      end
+
     end
 
     context "without provenance" do
@@ -86,21 +91,6 @@ describe Hippodamus do
 
         expect(File.exist?(get_file("AB.csv"))).to eq(true)
         expect(csv.count).to eq(56)
-      end
-
-      it "exports addresses for all areas" do
-        10.times do |i|
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123"))
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "EF1 123"))
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123"))
-        end
-
-        Hippodamus.create_csv(nil, false)
-        csv = CSV.parse(File.open(get_file("addresses.csv")).read)
-
-        expect(File.exist?(get_file("addresses.csv"))).to eq(true)
-        expect(csv.count).to eq(41) # We expect 4 rows per record, plus the header
       end
 
       it "exports the right stuff" do
@@ -122,6 +112,26 @@ describe Hippodamus do
             address.postcode.try(:name),
             "http://alpha.openaddressesuk.org/postcodes/#{address.postcode.try(:token)}"
           ])
+      end
+
+      it "combines multiple files into one" do
+        10.times do |i|
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "EF1 123"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123"))
+        end
+
+        Hippodamus.create_csv("AB", false)
+        Hippodamus.create_csv("CD", false)
+        Hippodamus.create_csv("EF", false)
+        Hippodamus.create_csv("GH", false)
+
+        Hippodamus.combine("csv", false)
+
+        csv = CSV.parse(File.open(get_file("addresses.csv")).read)
+
+        expect(csv.count).to eq(41) # We expect 1 row per record, plus the header
       end
 
     end
