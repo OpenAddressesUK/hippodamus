@@ -21,7 +21,13 @@ class Hippodamus
   end
 
   def self.single_file(type, with_provenance)
-    export(type, with_provenance)
+    postcode_areas.each do |area|
+      puts "Exporting #{area}"
+      export(type, with_provenance, area)
+    end
+
+    combine(type, with_provenance)
+
     zip_single_file(type)
     file = upload(type, with_provenance)
     `rm -r /tmp/addresses/`
@@ -32,11 +38,25 @@ class Hippodamus
       puts "Exporting #{area}"
       export(type, with_provenance, area)
     end
-
     zip_by_letter(type)
     zip_all(type)
     file = upload(type, with_provenance, "split")
     `rm -r /tmp/addresses/`
+  end
+
+  def self.combine(type , with_provenance)
+    if type == "csv"
+      headers = csv_header(with_provenance)
+      files = Dir.glob("/tmp/addresses/*.csv")
+      file = File.open("/tmp/addresses/addresses.csv","w")
+      file.puts headers.to_csv
+      files.each do |f|
+        file.puts File.readlines(f)[1..-1]
+      end
+      file.close
+    else
+      `cat /tmp/addresses/*json | #{ENV['JQ']} -s add > /tmp/addresses/addresses.json`
+    end
   end
 
   def self.postcode_areas

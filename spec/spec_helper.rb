@@ -7,6 +7,7 @@ require 'factory_girl'
 require 'database_cleaner'
 
 ENV['MONGOID_ENVIRONMENT'] = "test"
+ENV['JQ'] ||= "/usr/local/bin/jq"
 
 require 'hippodamus'
 
