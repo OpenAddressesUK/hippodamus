@@ -57,7 +57,7 @@ class Hippodamus
       file.close
       # Read the first line of the
     else
-
+      `cd /tmp/addresses/ ; cat *json | #{ENV['JQ']} -s add > addresses.json`
     end
   end
 
