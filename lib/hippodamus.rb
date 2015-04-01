@@ -26,7 +26,6 @@ class Hippodamus
       export(type, with_provenance, area)
     end
 
-    # Something goes here to combine the files
     combine(type, with_provenance)
 
     zip_single_file(type)
