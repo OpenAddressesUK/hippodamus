@@ -61,7 +61,7 @@ RSpec.configure do |config|
       public: true
     )
 
-    Hippodamus.create_csv("WS", false)
+    Hippodamus.create_csv("WS")
 
     Hippodamus.zip_by_letter("csv", false)
     Hippodamus.zip_all("csv", false)

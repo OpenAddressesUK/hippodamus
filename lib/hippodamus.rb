@@ -71,27 +71,31 @@ class Hippodamus
   end
 
   def self.export(area)
-    create_csv(area, true)
-    create_csv(area, false)
-    create_json(area, true)
-    create_json(area, false)
+    create_csv(area)
+    create_json(area)
   end
 
-  def self.create_csv(area, with_provenance)
+  def self.create_csv(area)
+    with_provenance = true
     addresses = Address.where("postcode.area" => area)
     path = output_path(with_provenance)
-    CSV.open("#{path}#{area || "addresses"}.csv", "wb") do |csv|
-      csv << csv_header(with_provenance)
-      addresses.each do |address|
-        if with_provenance === true
-          address.provenance["activity"]["derived_from"].each do |derivation|
-            csv << csv_row(address, derivation, true)
-          end
-        else
-          csv << csv_row(address, nil, false)
-        end
+
+    csv_plain = CSV.open("#{output_path(false)}#{area}.csv", "wb")
+    csv_prov = CSV.open("#{output_path(true)}#{area}.csv", "wb")
+
+    csv_plain << csv_header(false)
+    csv_prov << csv_header(true)
+
+    addresses.each do |address|
+      address.provenance["activity"]["derived_from"].each do |derivation|
+        csv_prov << csv_row(address, derivation, true)
       end
+      csv_plain << csv_row(address, nil, false)
     end
+
+  ensure
+    csv_plain.close
+    csv_prov.close
   end
 
   def self.csv_row(address, derivation, with_provenance)
@@ -129,29 +133,48 @@ class Hippodamus
     header
   end
 
-  def self.create_json(area, with_provenance)
+  def self.create_json(area)
     addresses = Address.where("postcode.area" => area)
-    path = output_path(with_provenance)
-    return nil if File.exist?("#{path}#{area}.json")
-    json = build_json(addresses, with_provenance)
-    File.open("#{path}#{area || "addresses"}.json","w") do |f|
-      f.write(json)
+
+    json_plain = File.open("#{output_path(false)}#{area || "addresses"}.json","w")
+    json_prov = File.open("#{output_path(true)}#{area || "addresses"}.json","w")
+
+    json_plain << '['
+    json_prov << '['
+
+    first = true
+    addresses.each do |address|
+      # write join char
+      unless first
+        json_plain << ","
+        json_prov << ","
+      else
+        first = false
+      end
+      # Write JSON
+      json_plain << build_json(address, false)
+      json_prov << build_json(address, true)
     end
+
+  ensure
+    json_plain << ']'
+    json_prov << ']'
+
+    json_plain.close
+    json_prov.close
   end
 
-  def self.build_json(addresses, with_provenance)
+  def self.build_json(address, with_provenance)
     Jbuilder.encode do |json|
-      json.array! addresses do |address|
-        json.address do
-          json.url url_for(address)
-          json.sao address.sao
-          json.pao address.pao
-          json.street address_part(json, address, "street")
-          json.locality address_part(json, address, "locality")
-          json.town address_part(json, address, "town")
-          json.postcode address_part(json, address, "postcode")
-          json.provenance address.provenance if with_provenance === true
-        end
+      json.address do
+        json.url url_for(address)
+        json.sao address.sao
+        json.pao address.pao
+        json.street address_part(json, address, "street")
+        json.locality address_part(json, address, "locality")
+        json.town address_part(json, address, "town")
+        json.postcode address_part(json, address, "postcode")
+        json.provenance address.provenance if with_provenance === true
       end
     end
   end
