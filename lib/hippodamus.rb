@@ -69,11 +69,7 @@ class Hippodamus
   end
 
   def self.create_csv(area, with_provenance)
-    if area.nil?
-      addresses = Address.all
-    else
-      addresses = Address.where("postcode.name" => /^#{area}[0-9]{1,2}[A-Z]?.*/i)
-    end
+    addresses = Address.where("postcode.area" => area)
     Dir.mkdir("/tmp/addresses") unless File.exist?("/tmp/addresses")
     CSV.open("/tmp/addresses/#{area || "addresses"}.csv", "wb") do |csv|
       csv << csv_header(with_provenance)
