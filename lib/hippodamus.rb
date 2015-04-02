@@ -71,22 +71,31 @@ class Hippodamus
   end
 
   def self.export(area)
-    create_csv(area)
-    create_json(area)
-  end
-
-  def self.create_csv(area)
-    with_provenance = true
     addresses = Address.where("postcode.area" => area)
-    path = output_path(with_provenance)
 
     csv_plain = CSV.open("#{output_path(false)}#{area}.csv", "wb")
     csv_prov = CSV.open("#{output_path(true)}#{area}.csv", "wb")
+    json_plain = File.open("#{output_path(false)}#{area || "addresses"}.json","w")
+    json_prov = File.open("#{output_path(true)}#{area || "addresses"}.json","w")
 
     csv_plain << csv_header(false)
     csv_prov << csv_header(true)
+    json_plain << '['
+    json_prov << '['
 
+    first = true
     addresses.each do |address|
+      # write join char
+      unless first
+        json_plain << ","
+        json_prov << ","
+      else
+        first = false
+      end
+      # Write JSON
+      json_plain << build_json(address, false)
+      json_prov << build_json(address, true)
+      # Write CSV
       address.provenance["activity"]["derived_from"].each do |derivation|
         csv_prov << csv_row(address, derivation, true)
       end
@@ -96,6 +105,12 @@ class Hippodamus
   ensure
     csv_plain.close
     csv_prov.close
+
+    json_plain << ']'
+    json_prov << ']'
+
+    json_plain.close
+    json_prov.close
   end
 
   def self.csv_row(address, derivation, with_provenance)
@@ -131,37 +146,6 @@ class Hippodamus
       "provenance.derived_from.downloaded_at",
       "provenance.derived_from.processing_script") if with_provenance === true
     header
-  end
-
-  def self.create_json(area)
-    addresses = Address.where("postcode.area" => area)
-
-    json_plain = File.open("#{output_path(false)}#{area || "addresses"}.json","w")
-    json_prov = File.open("#{output_path(true)}#{area || "addresses"}.json","w")
-
-    json_plain << '['
-    json_prov << '['
-
-    first = true
-    addresses.each do |address|
-      # write join char
-      unless first
-        json_plain << ","
-        json_prov << ","
-      else
-        first = false
-      end
-      # Write JSON
-      json_plain << build_json(address, false)
-      json_prov << build_json(address, true)
-    end
-
-  ensure
-    json_plain << ']'
-    json_prov << ']'
-
-    json_plain.close
-    json_prov.close
   end
 
   def self.build_json(address, with_provenance)

@@ -27,7 +27,7 @@ describe Hippodamus do
           FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
         end
 
-        Hippodamus.create_csv("AB")
+        Hippodamus.export("AB")
         csv = CSV.parse(File.open(get_file("AB.csv", @with_provenance)).read)
 
         expect(File.exist?(get_file("AB.csv", @with_provenance))).to eq(true)
@@ -38,7 +38,7 @@ describe Hippodamus do
         address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
         derivation = address.provenance['activity']['derived_from'].first
 
-        Hippodamus.create_csv("AB")
+        Hippodamus.export("AB")
         csv = CSV.parse(File.open(get_file("AB.csv", @with_provenance)).read)
 
         expect(csv[1]).to eq([
@@ -69,10 +69,10 @@ describe Hippodamus do
           FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123"))
         end
 
-        Hippodamus.create_csv("AB")
-        Hippodamus.create_csv("CD")
-        Hippodamus.create_csv("EF")
-        Hippodamus.create_csv("GH")
+        Hippodamus.export("AB")
+        Hippodamus.export("CD")
+        Hippodamus.export("EF")
+        Hippodamus.export("GH")
 
         Hippodamus.combine("csv", @with_provenance)
 
@@ -94,7 +94,7 @@ describe Hippodamus do
           FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
         end
 
-        Hippodamus.create_csv("AB")
+        Hippodamus.export("AB")
         csv = CSV.parse(File.open(get_file("AB.csv", @with_provenance)).read)
 
         expect(File.exist?(get_file("AB.csv", @with_provenance))).to eq(true)
@@ -104,7 +104,7 @@ describe Hippodamus do
       it "exports the right stuff" do
         address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
 
-        Hippodamus.create_csv("AB")
+        Hippodamus.export("AB")
         csv = CSV.parse(File.open(get_file("AB.csv", @with_provenance)).read)
 
         expect(csv[1]).to eq([
@@ -130,10 +130,10 @@ describe Hippodamus do
           FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123"))
         end
 
-        Hippodamus.create_csv("AB")
-        Hippodamus.create_csv("CD")
-        Hippodamus.create_csv("EF")
-        Hippodamus.create_csv("GH")
+        Hippodamus.export("AB")
+        Hippodamus.export("CD")
+        Hippodamus.export("EF")
+        Hippodamus.export("GH")
 
         Hippodamus.combine("csv", @with_provenance)
 
@@ -148,18 +148,18 @@ describe Hippodamus do
       FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "WS1 123"))
       FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "WV1 123"))
 
-      Hippodamus.create_csv("WS")
-      Hippodamus.create_csv("WV")
+      Hippodamus.export("WS")
+      Hippodamus.export("WV")
       Hippodamus.zip_by_letter(@format, false)
 
       expect(File.exist?(get_file("W.csv.zip", false))).to eq(true)
     end
 
     it "zips all the zips by format" do
-      Hippodamus.create_csv("WS")
-      Hippodamus.create_csv("WV")
-      Hippodamus.create_csv("TF")
-      Hippodamus.create_csv("ST")
+      Hippodamus.export("WS")
+      Hippodamus.export("WV")
+      Hippodamus.export("TF")
+      Hippodamus.export("ST")
 
       Hippodamus.zip_by_letter(@format, false)
       Hippodamus.zip_all(@format, false)
@@ -185,7 +185,7 @@ describe Hippodamus do
       it "exports the right stuff" do
         address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
 
-        Hippodamus.create_json("AB")
+        Hippodamus.export("AB")
         json = JSON.parse(File.open(get_file("AB.json", @with_provenance)).read)
 
         expect(json.first).to eq({
@@ -234,7 +234,7 @@ describe Hippodamus do
       it "exports the right stuff" do
         address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
 
-        Hippodamus.create_json("AB")
+        Hippodamus.export("AB")
         json = JSON.parse(File.open(get_file("AB.json", @with_provenance)).read)
 
         expect(json.first).to eq({
@@ -274,7 +274,7 @@ describe Hippodamus do
       it "exports the right stuff when there is no locality" do
         address = FactoryGirl.create(:address_with_provenance, locality: nil, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
 
-        Hippodamus.create_json("AB")
+        Hippodamus.export("AB")
         json = JSON.parse(File.open(get_file("AB.json", @with_provenance)).read)
 
         expect(json.first).to eq({
@@ -316,7 +316,7 @@ describe Hippodamus do
           FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
         end
 
-        Hippodamus.create_json("AB")
+        Hippodamus.export("AB")
         json = JSON.parse(File.open(get_file("AB.json", @with_provenance)).read)
 
         expect(File.exist?(get_file("AB.json", @with_provenance))).to eq(true)
@@ -331,10 +331,10 @@ describe Hippodamus do
           FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123"))
         end
 
-        Hippodamus.create_json("AB")
-        Hippodamus.create_json("CD")
-        Hippodamus.create_json("EF")
-        Hippodamus.create_json("GH")
+        Hippodamus.export("AB")
+        Hippodamus.export("CD")
+        Hippodamus.export("EF")
+        Hippodamus.export("GH")
 
         Hippodamus.combine("json", @with_provenance)
 
@@ -345,18 +345,18 @@ describe Hippodamus do
       end
 
       it "zips all exant files by letter" do
-        Hippodamus.create_json("WS")
-        Hippodamus.create_json("WV")
+        Hippodamus.export("WS")
+        Hippodamus.export("WV")
         Hippodamus.zip_by_letter(@format, @with_provenance)
 
         expect(File.exist?(get_file("W.json.zip", @with_provenance))).to eq(true)
       end
 
       it "zips all the zips by format" do
-        Hippodamus.create_json("WS")
-        Hippodamus.create_json("WV")
-        Hippodamus.create_json("TF")
-        Hippodamus.create_json("ST")
+        Hippodamus.export("WS")
+        Hippodamus.export("WV")
+        Hippodamus.export("TF")
+        Hippodamus.export("ST")
 
         Hippodamus.zip_by_letter(@format, @with_provenance)
         Hippodamus.zip_all(@format, @with_provenance)
