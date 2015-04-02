@@ -13,35 +13,26 @@ Fog.credentials = { path_style: true }
 
 class Hippodamus
   def self.perform(type, with_provenance, split = true)
-    if split === true
-      seperated_file(type, with_provenance)
-    else
-      single_file(type, with_provenance)
+    postcode_areas.each do |area|
+      puts "Exporting #{area}"
+      export(type, with_provenance, area)
     end
+
+    single_file(type, with_provenance)
+    seperated_file(type, with_provenance)
+    `rm -r /tmp/addresses/`
   end
 
   def self.single_file(type, with_provenance)
-    postcode_areas.each do |area|
-      puts "Exporting #{area}"
-      export(type, with_provenance, area)
-    end
-
     combine(type, with_provenance)
-
     zip_single_file(type)
     file = upload(type, with_provenance)
-    `rm -r /tmp/addresses/`
   end
 
   def self.seperated_file(type, with_provenance)
-    postcode_areas.each do |area|
-      puts "Exporting #{area}"
-      export(type, with_provenance, area)
-    end
     zip_by_letter(type)
     zip_all(type)
     file = upload(type, with_provenance, "split")
-    `rm -r /tmp/addresses/`
   end
 
   def self.combine(type , with_provenance)
