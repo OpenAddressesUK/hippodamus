@@ -12,36 +12,46 @@ Mongoid.load!(File.join(File.dirname(__FILE__), "..", "config", "mongoid.yml"), 
 Fog.credentials = { path_style: true }
 
 class Hippodamus
-  def self.perform(type, with_provenance, split = true)
+  def self.perform
     postcode_areas.each do |area|
       puts "Exporting #{area}"
-      export(type, with_provenance, area)
+      export(area)
     end
-
-    single_file(type, with_provenance)
-    seperated_file(type, with_provenance)
+    [
+      ["csv", true],
+      ["csv", false],
+      ["json", true],
+      ["json", false]
+    ]
+    .each do |array|
+      type = array[0]
+      with_provenance = array[1]
+      single_file(type, with_provenance)
+      seperatated_file(type, with_provenance)
+    end
     `rm -r /tmp/addresses/`
   end
 
   def self.single_file(type, with_provenance)
     combine(type, with_provenance)
-    zip_single_file(type)
+    zip_single_file(type, with_provenance)
     file = upload(type, with_provenance)
   end
 
   def self.seperated_file(type, with_provenance)
-    zip_by_letter(type)
-    zip_all(type)
+    zip_by_letter(type, with_provenance)
+    zip_all(type, with_provenance)
     file = upload(type, with_provenance, "split")
   end
 
   def self.combine(type , with_provenance)
+    path = output_path(with_provenance)
     if type == "csv"
       headers = csv_header(with_provenance)
-      `echo "#{headers.to_csv.strip}" > /tmp/addresses/addresses.csv`
-      `cat /tmp/addresses/*csv | grep -v "url,pao,sao" >> /tmp/addresses/addresses.csv`
+      `echo "#{headers.to_csv.strip}" > #{path}addresses.csv`
+      `cat #{path}*csv | grep -v "url,pao,sao" >> #{path}addresses.csv`
     else
-      `cat /tmp/addresses/*json | #{ENV['JQ']} -s add > /tmp/addresses/addresses.json`
+      `cat #{path}*json | #{ENV['JQ']} -s add > #{path}addresses.json`
     end
   end
 
@@ -60,18 +70,17 @@ class Hippodamus
     areas
   end
 
-  def self.export(type, with_provenance, area = nil)
-    if type == "csv"
-      create_csv(area, with_provenance)
-    else
-      create_json(area, with_provenance)
-    end
+  def self.export(area)
+    create_csv(area, true)
+    create_csv(area, false)
+    create_json(area, true)
+    create_json(area, false)
   end
 
   def self.create_csv(area, with_provenance)
     addresses = Address.where("postcode.area" => area)
-    Dir.mkdir("/tmp/addresses") unless File.exist?("/tmp/addresses")
-    CSV.open("/tmp/addresses/#{area || "addresses"}.csv", "wb") do |csv|
+    path = output_path(with_provenance)
+    CSV.open("#{path}#{area || "addresses"}.csv", "wb") do |csv|
       csv << csv_header(with_provenance)
       addresses.each do |address|
         if with_provenance === true
@@ -121,15 +130,11 @@ class Hippodamus
   end
 
   def self.create_json(area, with_provenance)
-    return nil if File.exist?("/tmp/addresses/#{area}.json")
-    Dir.mkdir("/tmp/addresses") unless File.exist?("/tmp/addresses")
-    if area.nil?
-      addresses = Address.all
-    else
-      addresses = Address.where("postcode.name" => /^#{area}[0-9]{1,2}[A-Z]?.*/i)
-    end
+    addresses = Address.where("postcode.area" => area)
+    path = output_path(with_provenance)
+    return nil if File.exist?("#{path}#{area}.json")
     json = build_json(addresses, with_provenance)
-    File.open("/tmp/addresses/#{area || "addresses"}.json","w") do |f|
+    File.open("#{path}#{area || "addresses"}.json","w") do |f|
       f.write(json)
     end
   end
@@ -171,11 +176,12 @@ class Hippodamus
     end
   end
 
-  def self.zip_by_letter(format)
+  def self.zip_by_letter(format, with_provenance)
+    path = output_path(with_provenance)
     ("A".."Z").each do |letter|
-      files = Dir.glob("/tmp/addresses/#{letter}*#{format}")
+      files = Dir.glob("#{path}#{letter}*#{format}")
       if files.count > 0
-        Zip::File.open("/tmp/addresses/#{letter}.#{format}.zip", Zip::File::CREATE) do |zipfile|
+        Zip::File.open("#{path}#{letter}.#{format}.zip", Zip::File::CREATE) do |zipfile|
           files.each do |file|
             zipfile.add(File.basename(file), file)
           end
@@ -184,15 +190,17 @@ class Hippodamus
     end
   end
 
-  def self.zip_single_file(format)
-    Zip::File.open("/tmp/addresses/addresses.#{format}.zip", Zip::File::CREATE) do |zipfile|
-      zipfile.add(File.basename("addresses.#{format}"), "/tmp/addresses/addresses.#{format}")
+  def self.zip_single_file(format, with_provenance)
+    path = output_path(with_provenance)
+    Zip::File.open("#{path}addresses.#{format}.zip", Zip::File::CREATE) do |zipfile|
+      zipfile.add(File.basename("addresses.#{format}"), "#{path}addresses.#{format}")
     end
   end
 
-  def self.zip_all(format)
-    Zip::File.open("/tmp/addresses/addresses.#{format}.zip", Zip::File::CREATE) do |zipfile|
-      Dir.glob("/tmp/addresses/*#{format}.zip").each do |file|
+  def self.zip_all(format, with_provenance)
+    path = output_path(with_provenance)
+    Zip::File.open("#{path}addresses.#{format}.zip", Zip::File::CREATE) do |zipfile|
+      Dir.glob("#{path}*#{format}.zip").each do |file|
         zipfile.add(File.basename(file), file)
       end
     end
@@ -205,7 +213,8 @@ class Hippodamus
     )
 
     # Update main file
-    file.body = File.open("/tmp/addresses/addresses.#{format}.zip").read
+    path = output_path(with_provenance)
+    file.body = File.open("#{path}addresses.#{format}.zip").read
     file.public = true
     file.save
     file
@@ -235,4 +244,11 @@ class Hippodamus
       "http://alpha.openaddressesuk.org/#{obj.class.name.downcase.pluralize}/#{obj.token}"
     end
   end
+
+  def self.output_path(with_provenance)
+    path = "/tmp/addresses/#{with_provenance}/"
+    FileUtils.mkdir_p(path) unless File.exist?(path)
+    path
+  end
+
 end
