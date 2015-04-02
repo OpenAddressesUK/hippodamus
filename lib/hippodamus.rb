@@ -38,13 +38,8 @@ class Hippodamus
   def self.combine(type , with_provenance)
     if type == "csv"
       headers = csv_header(with_provenance)
-      files = Dir.glob("/tmp/addresses/*.csv")
-      file = File.open("/tmp/addresses/addresses.csv","w")
-      file.puts headers.to_csv
-      files.each do |f|
-        file.puts File.readlines(f)[1..-1]
-      end
-      file.close
+      `echo "#{headers.to_csv.strip}" > /tmp/addresses/addresses.csv`
+      `cat /tmp/addresses/*csv | grep -v "url,pao,sao" >> /tmp/addresses/addresses.csv`
     else
       `cat /tmp/addresses/*json | #{ENV['JQ']} -s add > /tmp/addresses/addresses.json`
     end
