@@ -24,7 +24,7 @@ describe Hippodamus do
 
       it "exports addresses for a given area" do
         55.times do |i|
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123", area: "AB"))
         end
 
         Hippodamus.export("AB")
@@ -35,7 +35,7 @@ describe Hippodamus do
       end
 
       it "exports the right stuff" do
-        address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+        address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123", area: "AB"))
         derivation = address.provenance['activity']['derived_from'].first
 
         Hippodamus.export("AB")
@@ -63,10 +63,10 @@ describe Hippodamus do
 
       it "combines multiple files into one" do
         10.times do |i|
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123"))
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "EF1 123"))
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123", area: "AB"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123", area: "CD"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "EF1 123", area: "EF"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123", area: "GH"))
         end
 
         Hippodamus.export("AB")
@@ -91,7 +91,8 @@ describe Hippodamus do
 
       it "exports addresses for a given area" do
         55.times do |i|
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123", area: "AB"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123", area: "CD"))
         end
 
         Hippodamus.export("AB")
@@ -102,7 +103,7 @@ describe Hippodamus do
       end
 
       it "exports the right stuff" do
-        address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+        address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123", area: "AB"))
 
         Hippodamus.export("AB")
         csv = CSV.parse(File.open(get_file("AB.csv", @with_provenance)).read)
@@ -124,10 +125,10 @@ describe Hippodamus do
 
       it "combines multiple files into one" do
         10.times do |i|
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123"))
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "EF1 123"))
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123", area: "AB"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123", area: "CD"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "EF1 123", area: "EF"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123", area: "GH"))
         end
 
         Hippodamus.export("AB")
@@ -145,8 +146,8 @@ describe Hippodamus do
     end
 
     it "zips all exant files by letter" do
-      FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "WS1 123"))
-      FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "WV1 123"))
+      FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "WS1 123", area: "WS"))
+      FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "WV1 123", area: "WV"))
 
       Hippodamus.export("WS")
       Hippodamus.export("WV")
@@ -183,7 +184,7 @@ describe Hippodamus do
       end
 
       it "exports the right stuff" do
-        address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+        address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123", area: "AB"))
 
         Hippodamus.export("AB")
         json = JSON.parse(File.open(get_file("AB.json", @with_provenance)).read)
@@ -232,7 +233,7 @@ describe Hippodamus do
       end
 
       it "exports the right stuff" do
-        address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+        address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123", area: "AB"))
 
         Hippodamus.export("AB")
         json = JSON.parse(File.open(get_file("AB.json", @with_provenance)).read)
@@ -272,7 +273,7 @@ describe Hippodamus do
       end
 
       it "exports the right stuff when there is no locality" do
-        address = FactoryGirl.create(:address_with_provenance, locality: nil, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+        address = FactoryGirl.create(:address_with_provenance, locality: nil, postcode: FactoryGirl.create(:postcode, name: "AB1 123", area: "AB"))
 
         Hippodamus.export("AB")
         json = JSON.parse(File.open(get_file("AB.json", @with_provenance)).read)
@@ -313,7 +314,8 @@ describe Hippodamus do
 
       it "exports addresses for a given area" do
         55.times do |i|
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123", area: "AB"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123", area: "CD"))
         end
 
         Hippodamus.export("AB")
@@ -325,10 +327,10 @@ describe Hippodamus do
 
       it "combines multiple files into one" do
         10.times do |i|
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123"))
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "EF1 123"))
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123", area: "AB"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123", area: "CD"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "EF1 123", area: "EF"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123", area: "GH"))
         end
 
         Hippodamus.export("AB")
