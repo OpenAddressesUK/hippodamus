@@ -20,6 +20,7 @@ Coveralls.wear!
 Fog.mock!
 
 VCR.configure do |c|
+  c.ignore_localhost = true
   c.cassette_library_dir = 'spec/cassettes'
   c.default_cassette_options = { :record => :once }
   c.hook_into :webmock
@@ -60,10 +61,10 @@ RSpec.configure do |config|
       public: true
     )
 
-    Hippodamus.create_csv("WS", false)
+    Hippodamus.export("WS")
 
-    Hippodamus.zip_by_letter("csv")
-    Hippodamus.zip_all("csv")
+    Hippodamus.zip_by_letter("csv", false)
+    Hippodamus.zip_all("csv", false)
   end
 
   config.after(:example, :fog) do
@@ -73,6 +74,6 @@ RSpec.configure do |config|
 
 end
 
-def get_file(filename)
-  File.join( "/", "tmp", "addresses", filename )
+def get_file(filename, with_provenance)
+  File.join( "/", "tmp", "addresses", with_provenance.to_s, filename )
 end

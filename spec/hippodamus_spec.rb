@@ -18,24 +18,28 @@ describe Hippodamus do
 
     context "with provenance" do
 
+      before(:each) do
+        @with_provenance = true
+      end
+
       it "exports addresses for a given area" do
         55.times do |i|
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123", area: "AB"))
         end
 
-        Hippodamus.create_csv("AB", true)
-        csv = CSV.parse(File.open(get_file("AB.csv")).read)
+        Hippodamus.export("AB")
+        csv = CSV.parse(File.open(get_file("AB.csv", @with_provenance)).read)
 
-        expect(File.exist?(get_file("AB.csv"))).to eq(true)
+        expect(File.exist?(get_file("AB.csv", @with_provenance))).to eq(true)
         expect(csv.count).to eq((55 * 4) + 1) # We expect 4 rows per record, plus the header
       end
 
       it "exports the right stuff" do
-        address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+        address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123", area: "AB"))
         derivation = address.provenance['activity']['derived_from'].first
 
-        Hippodamus.create_csv("AB", true)
-        csv = CSV.parse(File.open(get_file("AB.csv")).read)
+        Hippodamus.export("AB")
+        csv = CSV.parse(File.open(get_file("AB.csv", @with_provenance)).read)
 
         expect(csv[1]).to eq([
             "http://alpha.openaddressesuk.org/addresses/#{address.token}",
@@ -59,20 +63,20 @@ describe Hippodamus do
 
       it "combines multiple files into one" do
         10.times do |i|
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123"))
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "EF1 123"))
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123", area: "AB"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123", area: "CD"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "EF1 123", area: "EF"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123", area: "GH"))
         end
 
-        Hippodamus.create_csv("AB", true)
-        Hippodamus.create_csv("CD", true)
-        Hippodamus.create_csv("EF", true)
-        Hippodamus.create_csv("GH", true)
+        Hippodamus.export("AB")
+        Hippodamus.export("CD")
+        Hippodamus.export("EF")
+        Hippodamus.export("GH")
 
-        Hippodamus.combine("csv", true)
+        Hippodamus.combine("csv", @with_provenance)
 
-        csv = CSV.parse(File.open(get_file("addresses.csv")).read)
+        csv = CSV.parse(File.open(get_file("addresses.csv", @with_provenance)).read)
 
         expect(csv.count).to eq((40 * 4) + 1) # We expect 4 rows per record, plus the header
       end
@@ -81,23 +85,28 @@ describe Hippodamus do
 
     context "without provenance" do
 
+      before(:each) do
+        @with_provenance = false
+      end
+
       it "exports addresses for a given area" do
         55.times do |i|
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123", area: "AB"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123", area: "CD"))
         end
 
-        Hippodamus.create_csv("AB", false)
-        csv = CSV.parse(File.open(get_file("AB.csv")).read)
+        Hippodamus.export("AB")
+        csv = CSV.parse(File.open(get_file("AB.csv", @with_provenance)).read)
 
-        expect(File.exist?(get_file("AB.csv"))).to eq(true)
+        expect(File.exist?(get_file("AB.csv", @with_provenance))).to eq(true)
         expect(csv.count).to eq(56)
       end
 
       it "exports the right stuff" do
-        address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+        address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123", area: "AB"))
 
-        Hippodamus.create_csv("AB", false)
-        csv = CSV.parse(File.open(get_file("AB.csv")).read)
+        Hippodamus.export("AB")
+        csv = CSV.parse(File.open(get_file("AB.csv", @with_provenance)).read)
 
         expect(csv[1]).to eq([
             "http://alpha.openaddressesuk.org/addresses/#{address.token}",
@@ -116,20 +125,20 @@ describe Hippodamus do
 
       it "combines multiple files into one" do
         10.times do |i|
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123"))
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "EF1 123"))
-          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123", area: "AB"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123", area: "CD"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "EF1 123", area: "EF"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123", area: "GH"))
         end
 
-        Hippodamus.create_csv("AB", false)
-        Hippodamus.create_csv("CD", false)
-        Hippodamus.create_csv("EF", false)
-        Hippodamus.create_csv("GH", false)
+        Hippodamus.export("AB")
+        Hippodamus.export("CD")
+        Hippodamus.export("EF")
+        Hippodamus.export("GH")
 
-        Hippodamus.combine("csv", false)
+        Hippodamus.combine("csv", @with_provenance)
 
-        csv = CSV.parse(File.open(get_file("addresses.csv")).read)
+        csv = CSV.parse(File.open(get_file("addresses.csv", @with_provenance)).read)
 
         expect(csv.count).to eq(41) # We expect 1 row per record, plus the header
       end
@@ -137,38 +146,26 @@ describe Hippodamus do
     end
 
     it "zips all exant files by letter" do
-      FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "WS1 123"))
-      FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "WV1 123"))
+      FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "WS1 123", area: "WS"))
+      FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "WV1 123", area: "WV"))
 
-      Hippodamus.create_csv("WS", false)
-      Hippodamus.create_csv("WV", false)
-      Hippodamus.zip_by_letter(@format)
+      Hippodamus.export("WS")
+      Hippodamus.export("WV")
+      Hippodamus.zip_by_letter(@format, false)
 
-      expect(File.exist?(get_file("W.csv.zip"))).to eq(true)
+      expect(File.exist?(get_file("W.csv.zip", false))).to eq(true)
     end
 
     it "zips all the zips by format" do
-      Hippodamus.create_csv("WS", false)
-      Hippodamus.create_csv("WV", false)
-      Hippodamus.create_csv("TF", false)
-      Hippodamus.create_csv("ST", false)
+      Hippodamus.export("WS")
+      Hippodamus.export("WV")
+      Hippodamus.export("TF")
+      Hippodamus.export("ST")
 
-      Hippodamus.zip_by_letter(@format)
-      Hippodamus.zip_all(@format)
+      Hippodamus.zip_by_letter(@format, false)
+      Hippodamus.zip_all(@format, false)
 
-      expect(File.exist?(get_file("addresses.csv.zip"))).to eq(true)
-    end
-
-    it "zips a single file" do
-      Hippodamus.create_csv(nil, false)
-      Hippodamus.zip_single_file(@format)
-
-      expect(File.exist?(get_file("addresses.csv.zip"))).to eq(true)
-      Zip::File.open(get_file("addresses.csv.zip")) do |zip|
-        entry = zip.glob('*.csv')
-        expect(entry.count).to eq(1)
-        expect(entry.first.name).to eq("addresses.csv")
-      end
+      expect(File.exist?(get_file("addresses.csv.zip", false))).to eq(true)
     end
 
   end
@@ -182,11 +179,15 @@ describe Hippodamus do
 
     context "with provenance" do
 
-      it "exports the right stuff" do
-        address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+      before(:each) do
+        @with_provenance = true
+      end
 
-        Hippodamus.create_json("AB", true)
-        json = JSON.parse(File.open(get_file("AB.json")).read)
+      it "exports the right stuff" do
+        address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123", area: "AB"))
+
+        Hippodamus.export("AB")
+        json = JSON.parse(File.open(get_file("AB.json", @with_provenance)).read)
 
         expect(json.first).to eq({
           "address" => {
@@ -227,11 +228,15 @@ describe Hippodamus do
 
     context "without provenance" do
 
-      it "exports the right stuff" do
-        address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+      before(:each) do
+        @with_provenance = false
+      end
 
-        Hippodamus.create_json("AB", false)
-        json = JSON.parse(File.open(get_file("AB.json")).read)
+      it "exports the right stuff" do
+        address = FactoryGirl.create(:address_with_provenance, postcode: FactoryGirl.create(:postcode, name: "AB1 123", area: "AB"))
+
+        Hippodamus.export("AB")
+        json = JSON.parse(File.open(get_file("AB.json", @with_provenance)).read)
 
         expect(json.first).to eq({
           "address" => {
@@ -268,10 +273,10 @@ describe Hippodamus do
       end
 
       it "exports the right stuff when there is no locality" do
-        address = FactoryGirl.create(:address_with_provenance, locality: nil, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+        address = FactoryGirl.create(:address_with_provenance, locality: nil, postcode: FactoryGirl.create(:postcode, name: "AB1 123", area: "AB"))
 
-        Hippodamus.create_json("AB", false)
-        json = JSON.parse(File.open(get_file("AB.json")).read)
+        Hippodamus.export("AB")
+        json = JSON.parse(File.open(get_file("AB.json", @with_provenance)).read)
 
         expect(json.first).to eq({
           "address" => {
@@ -307,86 +312,60 @@ describe Hippodamus do
         })
       end
 
-    end
+      it "exports addresses for a given area" do
+        55.times do |i|
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123", area: "AB"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123", area: "CD"))
+        end
 
-    it "exports addresses for a given area" do
-      55.times do |i|
-        FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
+        Hippodamus.export("AB")
+        json = JSON.parse(File.open(get_file("AB.json", @with_provenance)).read)
+
+        expect(File.exist?(get_file("AB.json", @with_provenance))).to eq(true)
+        expect(json.count).to eq(55)
       end
 
-      Hippodamus.create_json("AB", false)
-      json = JSON.parse(File.open(get_file("AB.json")).read)
+      it "combines multiple files into one" do
+        10.times do |i|
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123", area: "AB"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123", area: "CD"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "EF1 123", area: "EF"))
+          FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123", area: "GH"))
+        end
 
-      expect(File.exist?(get_file("AB.json"))).to eq(true)
-      expect(json.count).to eq(55)
-    end
+        Hippodamus.export("AB")
+        Hippodamus.export("CD")
+        Hippodamus.export("EF")
+        Hippodamus.export("GH")
 
-    it "exports addresses for all areas" do
-      10.times do |i|
-        FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
-        FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123"))
-        FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "EF1 123"))
-        FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123"))
+        Hippodamus.combine("json", @with_provenance)
+
+        json = JSON.parse(File.open(get_file("addresses.json", @with_provenance)).read)
+
+        expect(File.exist?(get_file("addresses.json", @with_provenance))).to eq(true)
+        expect(json.count).to eq(40)
       end
 
-      Hippodamus.create_json(nil, true)
-      json = JSON.parse(File.open(get_file("addresses.json")).read)
+      it "zips all exant files by letter" do
+        Hippodamus.export("WS")
+        Hippodamus.export("WV")
+        Hippodamus.zip_by_letter(@format, @with_provenance)
 
-      expect(File.exist?(get_file("addresses.json"))).to eq(true)
-      expect(json.count).to eq(40)
-    end
-
-    it "combines multiple files into one" do
-      10.times do |i|
-        FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "AB1 123"))
-        FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "CD1 123"))
-        FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "EF1 123"))
-        FactoryGirl.create(:address_with_provenance, pao: i, postcode: FactoryGirl.create(:postcode, name: "GH1 123"))
+        expect(File.exist?(get_file("W.json.zip", @with_provenance))).to eq(true)
       end
 
-      Hippodamus.create_json("AB", true)
-      Hippodamus.create_json("CD", true)
-      Hippodamus.create_json("EF", true)
-      Hippodamus.create_json("GH", true)
+      it "zips all the zips by format" do
+        Hippodamus.export("WS")
+        Hippodamus.export("WV")
+        Hippodamus.export("TF")
+        Hippodamus.export("ST")
 
-      Hippodamus.combine("json", true)
+        Hippodamus.zip_by_letter(@format, @with_provenance)
+        Hippodamus.zip_all(@format, @with_provenance)
 
-      json = JSON.parse(File.open(get_file("addresses.json")).read)
-
-      expect(File.exist?(get_file("addresses.json"))).to eq(true)
-      expect(json.count).to eq(40)
-    end
-
-    it "zips all exant files by letter" do
-      Hippodamus.create_json("WS", false)
-      Hippodamus.create_json("WV", false)
-      Hippodamus.zip_by_letter(@format)
-
-      expect(File.exist?(get_file("W.json.zip"))).to eq(true)
-    end
-
-    it "zips all the zips by format" do
-      Hippodamus.create_json("WS", false)
-      Hippodamus.create_json("WV", false)
-      Hippodamus.create_json("TF", false)
-      Hippodamus.create_json("ST", false)
-
-      Hippodamus.zip_by_letter(@format)
-      Hippodamus.zip_all(@format)
-
-      expect(File.exist?(get_file("addresses.json.zip"))).to eq(true)
-    end
-
-    it "zips a single file" do
-      Hippodamus.create_json(nil, false)
-      Hippodamus.zip_single_file(@format)
-
-      expect(File.exist?(get_file("addresses.json.zip"))).to eq(true)
-      Zip::File.open(get_file("addresses.json.zip")) do |zip|
-        entry = zip.glob('*.json')
-        expect(entry.count).to eq(1)
-        expect(entry.first.name).to eq("addresses.json")
+        expect(File.exist?(get_file("addresses.json.zip", @with_provenance))).to eq(true)
       end
+
     end
 
   end
@@ -400,10 +379,10 @@ describe Hippodamus do
     it "uploads to S3", :fog do
       Timecop.freeze(DateTime.parse(@date))
 
-      file = Hippodamus.upload("csv", "split", true)
+      file = Hippodamus.upload("csv", false, "split")
       md5 = Digest::MD5.hexdigest(file.body)
 
-      expect(md5).to eq(Digest::MD5.file('/tmp/addresses/addresses.csv.zip').hexdigest)
+      expect(md5).to eq(Digest::MD5.file('/tmp/addresses/false/addresses.csv.zip').hexdigest)
 
       Timecop.return
     end

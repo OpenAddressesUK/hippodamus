@@ -1,5 +1,7 @@
 language: ruby
 cache: bundler
+services:
+  - elasticsearch
 rvm:
 - 2.1.4
 env:
