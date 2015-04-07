@@ -49,9 +49,9 @@ class Hippodamus
     if type == "csv"
       headers = csv_header(with_provenance)
       `echo "#{headers.to_csv.strip}" > #{path}addresses.csv`
-      `cat #{path}*csv | grep -v "url,pao,sao" >> #{path}addresses.csv`
+      `cat \`find #{path} | grep "[A-Z][A-Z].csv"\` | grep -v "url,pao,sao" >> #{path}addresses.csv`
     else
-      `cat #{path}*json | #{ENV['JQ']} -s add > #{path}addresses.json`
+      `cat \`find #{path} | grep "[A-Z][A-Z].json"\` | #{ENV['JQ']} -s add > #{path}addresses.json`
     end
   end
 
