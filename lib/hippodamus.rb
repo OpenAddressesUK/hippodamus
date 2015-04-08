@@ -27,7 +27,7 @@ class Hippodamus
       type = array[0]
       with_provenance = array[1]
       single_file(type, with_provenance)
-      seperatated_file(type, with_provenance)
+      seperated_file(type, with_provenance)
     end
     `rm -r /tmp/addresses/`
   end
